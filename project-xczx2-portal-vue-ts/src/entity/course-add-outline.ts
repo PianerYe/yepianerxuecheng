@@ -83,6 +83,8 @@ export interface ICourseOutlineTreeNode {
    * 显示bar
    */
   ctlBarShow?: boolean
+
+  map(param: (v: any) => any): ICourseOutlineTreeNode[];
 }
 
 /**
