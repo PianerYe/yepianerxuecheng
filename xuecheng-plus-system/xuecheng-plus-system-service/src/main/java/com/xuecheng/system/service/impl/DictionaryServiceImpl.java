@@ -26,7 +26,6 @@ public class DictionaryServiceImpl extends ServiceImpl<DictionaryMapper, Diction
 
         List<Dictionary> list = this.list();
 
-
         return list;
     }
 
