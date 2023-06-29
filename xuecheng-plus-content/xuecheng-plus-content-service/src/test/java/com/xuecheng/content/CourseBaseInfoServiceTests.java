@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.annotation.Resource;
 
 @SpringBootTest
-public class CourseBaseInfoServiceInfo {
+public class CourseBaseInfoServiceTests {
     @Resource
     CourseBaseInfoService courseBaseInfoService;
 
