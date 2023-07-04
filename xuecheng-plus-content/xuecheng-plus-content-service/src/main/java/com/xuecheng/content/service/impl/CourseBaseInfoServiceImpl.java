@@ -123,7 +123,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //保存营销信息
         saveCourseMarket(courseMarketNew);
         //从数据库查出课程的详细信息,包括两部分
-        CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(companyId);
+        CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(id);
         return courseBaseInfo;
     }
     //查询课程信息
@@ -138,7 +138,9 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //组装在一起
         CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
         BeanUtils.copyProperties(courseBase,courseBaseInfoDto);
-        BeanUtils.copyProperties(courseMarket,courseBaseInfoDto);
+        if (courseMarket!=null){
+            BeanUtils.copyProperties(courseMarket,courseBaseInfoDto);
+        }
         //通过courseCategoryMapper查询分类信息，将分类名称放在courseBaseInfoDto中
         //todo: 课程分类的名称设置到对象中
         String mt = courseBaseInfoDto.getMt();
@@ -146,10 +148,10 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         String mTName = courseCategoryMt.getName();
         courseBaseInfoDto.setMtName(mTName);
 
-        String st = courseBaseInfoDto.getMt();
-        CourseCategory courseCategorySt = courseCategoryMapper.selectById(mt);
+        String st = courseBaseInfoDto.getSt();
+        CourseCategory courseCategorySt = courseCategoryMapper.selectById(st);
         String sTName = courseCategorySt.getName();
-        courseBaseInfoDto.setMtName(sTName);
+        courseBaseInfoDto.setStName(sTName);
 
         return courseBaseInfoDto;
     }
