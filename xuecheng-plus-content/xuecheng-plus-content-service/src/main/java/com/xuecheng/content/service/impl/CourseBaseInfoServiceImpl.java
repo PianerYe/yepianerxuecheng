@@ -68,34 +68,34 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     @Override
     public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto dto) {
         //参数合法性校验
-        if (StringUtils.isBlank(dto.getName())) {
-//            throw new RuntimeException("课程名称为空");
-            XueChengPlusException.cast("课程名称为空");
-        }
-
-        if (StringUtils.isBlank(dto.getMt())) {
-            throw new RuntimeException("课程分类为空");
-        }
-
-        if (StringUtils.isBlank(dto.getSt())) {
-            throw new RuntimeException("课程分类为空");
-        }
-
-        if (StringUtils.isBlank(dto.getGrade())) {
-            throw new RuntimeException("课程等级为空");
-        }
-
-        if (StringUtils.isBlank(dto.getTeachmode())) {
-            throw new RuntimeException("教育模式为空");
-        }
-
-        if (StringUtils.isBlank(dto.getUsers())) {
-            throw new RuntimeException("适应人群为空");
-        }
-
-        if (StringUtils.isBlank(dto.getCharge())) {
-            throw new RuntimeException("收费规则为空");
-        }
+//        if (StringUtils.isBlank(dto.getName())) {
+////            throw new RuntimeException("课程名称为空");
+//            XueChengPlusException.cast("课程名称为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getMt())) {
+//            throw new RuntimeException("课程分类为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getSt())) {
+//            throw new RuntimeException("课程分类为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getGrade())) {
+//            throw new RuntimeException("课程等级为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getTeachmode())) {
+//            throw new RuntimeException("教育模式为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getUsers())) {
+//            throw new RuntimeException("适应人群为空");
+//        }
+//
+//        if (StringUtils.isBlank(dto.getCharge())) {
+//            throw new RuntimeException("收费规则为空");
+//        }
 
         //向课程基本信息表course_base写入数据
         CourseBase courseBaseNew = new CourseBase();
@@ -168,7 +168,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //如果课程收费，价格没有填写也需要抛异常
         if (charge.equals("201001")){
             if (courseMarketNew.getPrice() == null || courseMarketNew.getPrice() <= 0){
-                throw new RuntimeException("课程的价格不能为空并且必须大于0");
+//                throw new RuntimeException("课程的价格不能为空并且必须大于0");
+                XueChengPlusException.cast("课程的价格不能为空并且必须大于0");
             }
         }
         //从数据库查询营销信息,存在则更新，不存在则添加

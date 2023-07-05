@@ -25,11 +25,11 @@ Content-Type: application/json
   "validDays": 365,
   "mt": "1-1",
   "st": "1-1-1",
-  "name": "java网络编程高级",
+  "name": "",
   "pic": "fdsd",
   "teachmode": "200002",
   "users": "初级人员",
-  "tags": "dsadasdasfas",
+  "tags": "dsadasdasfasaasd",
   "grade": "204001",
   "description": "java网络编程高级java网络编程高级java网络编程高级"
 }
