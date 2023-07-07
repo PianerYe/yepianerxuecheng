@@ -1,4 +1,4 @@
-package com.xuecheng.base.execption;
+package com.xuecheng.base.exception;
 
 /**
  * Date:2023/7/5

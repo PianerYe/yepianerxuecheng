@@ -1,4 +1,4 @@
-package com.xuecheng.base.execption;
+package com.xuecheng.base.exception;
 
 public enum CommonError {
     UNKOWN_ERROR("执行过程异常，请重试。"),
