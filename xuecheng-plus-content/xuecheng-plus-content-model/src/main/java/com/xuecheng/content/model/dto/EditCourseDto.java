@@ -17,8 +17,8 @@ import javax.validation.constraints.NotEmpty;
 @ApiModel(value = "EditCourseDto",description = "修改课程基本信息")
 public class EditCourseDto extends AddCourseDto{
 
-    @NotEmpty(message = "课程id不能为空")
-    @NotEmpty(message = "课程id不能为空",groups = {ValidationGroups.Update.class})
+//    @NotEmpty(message = "课程id不能为空")
+//    @NotEmpty(message = "课程id不能为空",groups = {ValidationGroups.Update.class})
     @ApiModelProperty(value = "课程id",required = true)
-    private Long CourseId;
+    private long Id;
 }
