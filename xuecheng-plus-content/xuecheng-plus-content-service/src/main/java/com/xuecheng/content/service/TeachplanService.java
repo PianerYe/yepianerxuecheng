@@ -26,4 +26,6 @@ public interface TeachplanService {
     public void deleteTeachplan(Long id);
 
     public void moveupTeachplan(Long id);
+
+    public void movedownTeachplan(Long id);
 }

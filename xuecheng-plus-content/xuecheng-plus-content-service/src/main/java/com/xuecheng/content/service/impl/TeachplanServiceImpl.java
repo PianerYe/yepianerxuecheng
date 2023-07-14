@@ -93,8 +93,11 @@ public class TeachplanServiceImpl implements TeachplanService {
 
     private void getUpdateOrderBy(Teachplan teachplan,int changeOrderby){
         LambdaUpdateWrapper<Teachplan> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(Teachplan::getOrderby, changeOrderby);
-        teachplanMapper.update(teachplan,updateWrapper);
+        //  update set getOrderby=changeOrderby teachplan WHERE id = ?;
+          updateWrapper.eq(Teachplan::getId,teachplan.getId());
+          Teachplan teachplan1 = new Teachplan();
+          teachplan1.setOrderby(changeOrderby);
+          teachplanMapper.update(teachplan1,updateWrapper);
     }
     @Transactional
     @Override
@@ -107,6 +110,7 @@ public class TeachplanServiceImpl implements TeachplanService {
         Integer orderby = teachplan.getOrderby();
         if (orderby == 1){
             XueChengPlusException.cast("已经在最顶端了，无法上移了");
+
         }else if (orderby >= 2){
             //被迫下移的大/小章节 -1
             //SELECT * FROM teachplan WHERE course_id = 117 AND parentid = 291 AND orderby = 1;
@@ -115,8 +119,8 @@ public class TeachplanServiceImpl implements TeachplanService {
                     .eq(Teachplan::getParentid,teachplan.getParentid())
                     .eq(Teachplan::getOrderby,(teachplan.getOrderby()-1));
             Teachplan teachplan1 = teachplanMapper.selectOne(queryWrapper);//备注1
-            getUpdateOrderBy(teachplan1, orderby + 1);
-            //上移的大/小章节 +1
+            getUpdateOrderBy(teachplan1, orderby);
+            //上移的大/小章节 -1
             getUpdateOrderBy(teachplan, orderby - 1);
 
         }else {
@@ -124,5 +128,35 @@ public class TeachplanServiceImpl implements TeachplanService {
         }
 
 
+    }
+
+    @Transactional
+    @Override
+    public void movedownTeachplan(Long id) {
+        //首先查询这是大章节的排序还是小章节的总排序（层级结构）
+        //可以直接查询父类的id，通过这个sql语句直接排序即可
+        //SELECT orderby FROM teachplan WHERE id = 117
+        //查询parentid
+        Teachplan teachplan = teachplanMapper.selectById(id);
+        Integer orderby = teachplan.getOrderby();
+        //SELECT COUNT(1) FROM teachplan WHERE parentid = 0  AND course_id = 117
+        Long courseId = teachplan.getCourseId();
+        Long parentid = teachplan.getParentid();
+        LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Teachplan::getParentid,parentid).eq(Teachplan::getCourseId,courseId);
+        Integer integer = teachplanMapper.selectCount(queryWrapper);
+        if (orderby > integer || orderby < 0){
+            XueChengPlusException.cast("出现未知的异常");
+        }else if(orderby == integer){
+            XueChengPlusException.cast("已经在最底端了，无法下移了");
+        }else {
+            //被迫上移的大/小章节 +1
+            //SELECT * FROM teachplan WHERE course_id = 117 AND parentid = 291 AND orderby = 1;
+            queryWrapper.eq(Teachplan::getOrderby,orderby+1);
+            Teachplan teachplan1 = teachplanMapper.selectOne(queryWrapper);//备注1
+            getUpdateOrderBy(teachplan1,orderby);
+            //下移的大/小章节 +1
+            getUpdateOrderBy(teachplan, orderby + 1);
+        }
     }
 }
