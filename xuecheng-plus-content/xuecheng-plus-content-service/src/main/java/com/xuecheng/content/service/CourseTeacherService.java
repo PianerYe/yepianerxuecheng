@@ -13,4 +13,6 @@ import java.util.List;
 public interface CourseTeacherService {
 
     public List<CourseTeacher> getTeacherList(Long courseId);
+
+    public void addTeacher(Long companyId, CourseTeacher courseTeacher);
 }

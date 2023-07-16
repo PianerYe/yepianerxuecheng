@@ -31,4 +31,13 @@ public class CourseTeacherController {
         List<CourseTeacher> list = courseTeacherService.getTeacherList(courseId);
         return list;
     }
+
+    @ApiOperation("添加教师")
+    @PostMapping ("/courseTeacher")
+    public CourseTeacher addTeach(@RequestBody CourseTeacher courseTeacher){
+        //只允许向机构自己的课程中添加老师、删除老师。
+        Long companyId = 1232141425L;
+        courseTeacherService.addTeacher(companyId,courseTeacher);
+        return null;
+    }
 }
