@@ -6,6 +6,7 @@ import com.xuecheng.content.model.po.CourseTeacher;
 import com.xuecheng.content.service.CourseTeacherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -32,12 +33,17 @@ public class CourseTeacherController {
         return list;
     }
 
-    @ApiOperation("添加教师")
+    @ApiOperation("添加教师/修改教师")
     @PostMapping ("/courseTeacher")
-    public CourseTeacher addTeach(@RequestBody CourseTeacher courseTeacher){
+    public void addTeach(@RequestBody CourseTeacher courseTeacher){
         //只允许向机构自己的课程中添加老师、删除老师。
         Long companyId = 1232141425L;
         courseTeacherService.addTeacher(companyId,courseTeacher);
-        return null;
+    }
+
+    @ApiOperation("删除教师")
+    @DeleteMapping ("/courseTeacher")
+    public void deleteTeach(){
+        return;
     }
 }

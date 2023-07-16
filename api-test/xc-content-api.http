@@ -41,3 +41,19 @@ Content-Type: application/json
 ### 课程查询
 GET {{content_host}}/content/teachplan/117/tree-nodes
 Content-Type: application/json
+
+### 修改老师
+PUT {{content_host}}/content/courseTeacher
+Content-Type: application/json
+
+{
+  "id": 21,
+  "courseId": 79,
+  "teacherName": "李四郎",
+  "position": "培训二级讲师",
+  "introduction": "张天师传人，负责推广",
+  "photograph": null,
+  "position": "培训二级讲师",
+  "teacherName": "李四郎"
+}
+
