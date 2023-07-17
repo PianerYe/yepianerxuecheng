@@ -2,6 +2,7 @@ package com.xuecheng.content;
 
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
+import com.xuecheng.content.model.dto.CourseBaseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDto;
 import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
@@ -27,7 +28,7 @@ public class CourseBaseInfoServiceTests {
         pageParams.setPageNo(1L);
         pageParams.setPageSize(3L);
 
-        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, courseParamsDto);
+        PageResult<CourseBaseDto> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, courseParamsDto);
         System.out.println(courseBasePageResult);
     }
 }
