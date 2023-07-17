@@ -42,4 +42,6 @@ public interface CourseBaseInfoService {
     public void setCoursepublish(Long companyId,Long id);
 
     public void setCourseoffline(Long companyId, Long id);
+
+    public void deleteCourse(Long companyId,Long id);
 }

@@ -77,4 +77,12 @@ public class CourseBaseInforController {
         Long companyId = 1232141425L;
         courseBaseInfoService.setCourseoffline(companyId,id);
     }
+
+    @ApiOperation("未提交状态的课程，进行删除")
+    @DeleteMapping("/course/{id}")
+    public void deleteCourse(@PathVariable Long id){
+        //获取到用户所属机构的id
+        Long companyId = 1232141425L;
+        courseBaseInfoService.deleteCourse(companyId,id);
+    }
 }

@@ -5,16 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
-import com.xuecheng.content.mapper.CourseBaseMapper;
-import com.xuecheng.content.mapper.CourseCategoryMapper;
-import com.xuecheng.content.mapper.CourseMarketMapper;
+import com.xuecheng.content.mapper.*;
 import com.xuecheng.content.model.dto.AddCourseDto;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDto;
-import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.model.po.CourseCategory;
-import com.xuecheng.content.model.po.CourseMarket;
+import com.xuecheng.content.model.po.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +32,10 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     CourseMarketMapper courseMarketMapper;
     @Resource
     CourseCategoryMapper courseCategoryMapper;
+    @Resource
+    CourseTeacherMapper courseTeacherMapper;
+    @Resource
+    TeachplanMapper teachplanMapper;
 
     @Override
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto queryCourseParamsDto) {
@@ -224,6 +224,50 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         if (i <= 0){
             XueChengPlusException.cast("发布状态有误");
         }
+    }
+
+    @Transactional
+    @Override
+    public void deleteCourse(Long companyId,Long id) {
+        //首先判断是否是同一机构下的
+        CourseBase courseBase = courseBaseMapper.selectById(id);
+        if (!companyId.equals(courseBase.getCompanyId())){
+            XueChengPlusException.cast("本机构只能修改本机构的课程");
+        }
+        //首先，判断课程是未审核状态的
+        String auditStatus = courseBase.getAuditStatus();
+        // 判断是否是未审核状态
+        if (!"202002".equals(auditStatus)){
+            XueChengPlusException.cast("该课程已经审核通过，无法直接删除，请联系管理员");
+        }
+        //表明是未审核状态的，可以删除执行操作
+        //其次，判断其他关联的数据库关联信息，然后进行删除
+        //courseBase表 course_teacher表  course_plan表  teachplan_media表  teachplan_work表
+        //不删除teachplan_media表  teachplan_course表  暂时
+        //判断course_teacher表
+        LambdaQueryWrapper<CourseTeacher> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(CourseTeacher::getCourseId,id);
+        //删除course_teacher表数据
+        List<CourseTeacher> courseTeachers = courseTeacherMapper.selectList(queryWrapper);
+        if (courseTeachers != null){
+            for (CourseTeacher courseTeacher : courseTeachers) {
+                Long teacherId = courseTeacher.getId();
+                courseTeacherMapper.deleteById(teacherId);
+            }
+        }
+        //判断 course_plan表
+        LambdaQueryWrapper<Teachplan> queryWrapper2 = new LambdaQueryWrapper();
+        queryWrapper2.eq(Teachplan::getCourseId,id);
+        //删除course_plan表数据
+        List<Teachplan> teachplans = teachplanMapper.selectList(queryWrapper2);
+        if (teachplans != null){
+            for (Teachplan teachplan : teachplans) {
+                Long teachplanId = teachplan.getId();
+                teachplanMapper.deleteById(teachplanId);
+            }
+        }
+        //删除courseBase表
+        courseBaseMapper.deleteById(id);
     }
 
 
