@@ -10,6 +10,7 @@ import com.xuecheng.content.model.po.CourseTeacher;
 import com.xuecheng.content.service.CourseTeacherService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -56,6 +57,7 @@ public class CourseTeacherServiceImpl implements CourseTeacherService {
     /**
      * 添加教师
      * */
+    @Transactional
     @Override
     public void addTeacher(Long companyId, CourseTeacher courseTeacher) {
         Boolean equalCompany = isEqualCompany(companyId, courseTeacher);
@@ -77,12 +79,26 @@ public class CourseTeacherServiceImpl implements CourseTeacherService {
                 courseTeacherNew.setCreateDate(courseTeacher1.getCreateDate());
                 int i = courseTeacherMapper.updateById(courseTeacherNew);
                 if (i <= 0){
-                    XueChengPlusException.cast("修改加课程失败");
+                    XueChengPlusException.cast("修改课程失败");
                 }else {
                     System.out.println("修改课程成功");
                 }
             }
 
+        }
+    }
+
+    @Transactional
+    @Override
+    public void deleteTeacher(Long companyId, Long courseId, Long id) {
+        CourseTeacher courseTeacher = courseTeacherMapper.selectById(id);
+        Boolean equalCompany = isEqualCompany(companyId,courseTeacher);
+        if (equalCompany){
+            int i = courseTeacherMapper.deleteById(id);
+            if ( i <= 0){
+                XueChengPlusException.cast("删除课程失败");
+            }
+            System.out.println("删除课程成功");
         }
     }
 }

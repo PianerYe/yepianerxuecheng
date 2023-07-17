@@ -42,8 +42,11 @@ public class CourseTeacherController {
     }
 
     @ApiOperation("删除教师")
-    @DeleteMapping ("/courseTeacher")
-    public void deleteTeach(){
+    @DeleteMapping ("/courseTeacher/course/{courseId}/{id}")
+    public void deleteTeach(@PathVariable Long courseId,@PathVariable Long id){
+        //只允许向机构自己的课程中添加老师、删除老师。
+        Long companyId = 1232141425L;
+        courseTeacherService.deleteTeacher(companyId,courseId,id);
         return;
     }
 }

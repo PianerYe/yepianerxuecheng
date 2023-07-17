@@ -16,4 +16,5 @@ public interface CourseTeacherService {
 
     public void addTeacher(Long companyId, CourseTeacher courseTeacher);
 
+    public void deleteTeacher(Long companyId, Long courseId, Long id);
 }

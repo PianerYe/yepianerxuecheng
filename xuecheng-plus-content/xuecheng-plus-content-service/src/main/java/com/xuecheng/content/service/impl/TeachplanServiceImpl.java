@@ -110,7 +110,6 @@ public class TeachplanServiceImpl implements TeachplanService {
         Integer orderby = teachplan.getOrderby();
         if (orderby == 1){
             XueChengPlusException.cast("已经在最顶端了，无法上移了");
-
         }else if (orderby >= 2){
             //被迫下移的大/小章节 -1
             //SELECT * FROM teachplan WHERE course_id = 117 AND parentid = 291 AND orderby = 1;
