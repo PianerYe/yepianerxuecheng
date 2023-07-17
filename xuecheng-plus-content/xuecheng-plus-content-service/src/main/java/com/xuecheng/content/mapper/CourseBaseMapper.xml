@@ -29,4 +29,13 @@
         id, company_id, company_name, name, users, tags, mt, st, grade, teachmode, description, pic, create_date, change_date, create_people, change_people, audit_status, status
     </sql>
 
+    <!-- 修改为上架 -->
+    <update id="updateStatusCoursepublish" parameterType="long">
+        UPDATE course_base  SET STATUS = '203002'   WHERE id = #{id}
+    </update>
+    <!-- 修改为下架 -->
+    <update id="updateStatusCourseoffline" parameterType="long">
+        UPDATE course_base  SET STATUS = '203001'   WHERE id = #{id}
+    </update>
+
 </mapper>

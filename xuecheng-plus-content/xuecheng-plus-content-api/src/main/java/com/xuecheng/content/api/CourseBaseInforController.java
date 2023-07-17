@@ -61,4 +61,20 @@ public class CourseBaseInforController {
         CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.updateCourseBase(companyId, editCourseDto);
         return courseBaseInfoDto;
     }
+
+    @ApiOperation("审核完成后,发布课程")
+    @PostMapping("/coursepublish/{id}")
+    public void setCoursepublish(@PathVariable Long id){
+        //获取到用户所属机构的id
+        Long companyId = 1232141425L;
+        courseBaseInfoService.setCoursepublish(companyId,id);
+    }
+
+    @ApiOperation("审核完成后,下架课程")
+    @GetMapping ("/courseoffline/{id}")
+    public void setCourseoffline(@PathVariable Long id){
+        //获取到用户所属机构的id
+        Long companyId = 1232141425L;
+        courseBaseInfoService.setCourseoffline(companyId,id);
+    }
 }

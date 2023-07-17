@@ -194,6 +194,39 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         return courseBaseInfo;
     }
 
+    /**
+     * 审核完成课程，修改状态改为发布
+     * */
+    @Override
+    public void setCoursepublish(Long companyId, Long id) {
+        CourseBase courseBase = courseBaseMapper.selectById(id);
+        if (!companyId.equals(courseBase.getCompanyId())){
+            XueChengPlusException.cast("本机构只能修改本机构的课程");
+        }
+        //update status = "203002"  course_base where id = #{id}
+        int i = courseBaseMapper.updateStatusCoursepublish(id);
+        if (i <= 0){
+            XueChengPlusException.cast("发布状态有误");
+        }
+    }
+
+    /**
+     * 审核完成课程，修改状态改为下架
+     * */
+    @Override
+    public void setCourseoffline(Long companyId, Long id) {
+        CourseBase courseBase = courseBaseMapper.selectById(id);
+        if (!companyId.equals(courseBase.getCompanyId())){
+            XueChengPlusException.cast("本机构只能修改本机构的课程");
+        }
+        //update status = "203002"  course_base where id = #{id}
+        int i = courseBaseMapper.updateStatusCourseoffline(id);
+        if (i <= 0){
+            XueChengPlusException.cast("发布状态有误");
+        }
+    }
+
+
     //单独写一个方法保存营销信息，逻辑：存在则更新，不存在则添加
     private int saveCourseMarket(CourseMarket courseMarketNew){
         //参数的合法性校验

@@ -12,4 +12,7 @@ import com.xuecheng.content.model.po.CourseBase;
  */
 public interface CourseBaseMapper extends BaseMapper<CourseBase> {
 
+    public int updateStatusCoursepublish(Long id);
+
+    public int updateStatusCourseoffline(Long id);
 }
