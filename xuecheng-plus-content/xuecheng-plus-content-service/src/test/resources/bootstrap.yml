@@ -1,12 +1,21 @@
-#微服务配置
 spring:
   application:
-    name: content-service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.255.100:3307/xc_content?serverTimezone=UTC&userUnicode=true&useSSL=false&
-    username: root
-    password: 123456
+    name: content-service # 服务名
+  profiles:
+    active: dev # 环境名
+  cloud:
+    nacos:
+      server-addr: 192.168.255.100:8848
+      config: # 配置文件的相关信息
+        namespace: devyepianer
+        group: yepianerxuecheng
+        fileExtension: yaml
+        refreshEnabled: true
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://192.168.255.100:3307/xc_content?serverTimezone=UTC&userUnicode=true&useSSL=false&
+#    username: root
+#    password: 123456
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
