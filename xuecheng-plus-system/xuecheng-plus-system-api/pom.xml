@@ -87,6 +87,12 @@
         </dependency>
 
         <!-- Spring Boot 集成 swagger -->
+        <!--1.5.20版本会导致数字类型转换异常，引入1.5.21的包避免这个问题-->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>1.5.21</version>
+        </dependency>
         <dependency>
             <groupId>com.spring4all</groupId>
             <artifactId>swagger-spring-boot-starter</artifactId>
