@@ -8,6 +8,28 @@ spring:
     name: system-api
   profiles:
     active: dev # 环境名
+  cloud:
+    nacos:
+      server-addr: 192.168.255.100:8848
+      discovery:
+        namespace: devyepianer
+        group: yepianerxuecheng
+      config: # 配置文件的相关信息
+        namespace: devyepianer
+        group: yepianerxuecheng
+        fileExtension: yaml
+        refreshEnabled: true
+        extensionConfigs:
+          - dataId: system-service-${spring.profiles.active}.yaml
+            group: yepianerxuecheng
+            refresh: true
+        sharedConfigs:
+          - dataId: swagger-${spring.profiles.active}.yaml
+            group: yepianerxuecheng-common
+            refresh: true
+          - dataId: logging-${spring.profiles.active}.yaml
+            group: yepianerxuecheng-common
+            refresh: true
 
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver

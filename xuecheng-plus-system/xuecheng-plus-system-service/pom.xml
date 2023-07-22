@@ -25,6 +25,11 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- nacos注册配置管理 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
         <!-- mybatis plus的依赖 -->
         <dependency>
             <groupId>com.baomidou</groupId>
