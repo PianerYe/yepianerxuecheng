@@ -1,6 +1,7 @@
 package com.xuecheng.media.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
@@ -9,10 +10,12 @@ import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.media.mapper.MediaFilesMapper;
+import com.xuecheng.media.mapper.MediaProcessMapper;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
 import com.xuecheng.media.model.po.MediaFiles;
+import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.service.MediaFileService;
 import io.minio.*;
 import io.minio.errors.*;
@@ -21,6 +24,7 @@ import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +58,8 @@ public class MediaFileServiceImpl implements MediaFileService {
   MediaFilesMapper mediaFilesMapper;
   @Autowired
   MinioClient minioClient;
+  @Resource
+  MediaProcessMapper mediaProcessMapper;
 
   @Resource
   MediaFileService currentProxy;
@@ -70,7 +76,8 @@ public class MediaFileServiceImpl implements MediaFileService {
 
   //构建查询条件对象
   LambdaQueryWrapper<MediaFiles> queryWrapper = new LambdaQueryWrapper<>();
-  
+  queryWrapper.like(StringUtils.isNotEmpty(queryMediaParamsDto.getFilename()),MediaFiles::getFilename,queryMediaParamsDto.getFilename())
+          .eq(StringUtils.isNotEmpty(queryMediaParamsDto.getFileType()),MediaFiles::getFileType,queryMediaParamsDto.getFileType());
   //分页对象
   Page<MediaFiles> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
   // 查询数据内容获得结果
@@ -230,7 +237,8 @@ public class MediaFileServiceImpl implements MediaFileService {
             try {
                 FilterInputStream inputStream = minioClient.getObject(getObjectArgs);
                 if (inputStream != null){
-                    //文件已存在
+                    //文件已存在，不用检查没关系的
+                    //检查文件状态，是否上传完成
                     return RestResponse.success(true);
                 }
             } catch (Exception e) {
@@ -243,13 +251,24 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     @Override
+    @Transactional
     public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex) {
 
         //分块存储路径:md5前两位为两个目录,chunk存储分块文件
         //根据md5得到分块文件的路径
         String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
-
-        //如果数据库存在再查询Minio
+        //得到分块文件路径
+        //判断数据库是否存在
+        String fileId = fileMd5 + chunkIndex;
+        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MediaProcess::getFileId, fileId);
+        MediaProcess mediaProcess = mediaProcessMapper.selectOne(queryWrapper);
+        if (mediaProcess != null && "1".equals(mediaProcess.getStatus())){
+            //数据库存在
+            return RestResponse.success(true);
+        }
+        //如果数据库不存在
+        //如果数不存在再查询Minio
         GetObjectArgs getObjectArgs = GetObjectArgs.builder()
                 .bucket(bucket_video)
                 .object(chunkFileFolderPath + chunkIndex ).build();
@@ -258,7 +277,10 @@ public class MediaFileServiceImpl implements MediaFileService {
             FilterInputStream inputStream = minioClient.getObject(getObjectArgs);
             if (inputStream != null){
                 //文件已存在
-                return RestResponse.success(true);
+                //清除分块文件，并且重新设置下载
+                //clearChunkFiles
+                clearChunkIndexFile(chunkFileFolderPath,chunkIndex);
+                return RestResponse.success(false);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,7 +288,25 @@ public class MediaFileServiceImpl implements MediaFileService {
     return RestResponse.success(false);
 }
 
+    private void clearChunkIndexFile(String chunkFileFolderPath,int chunkIndex){
+        /**
+         * List<ComposeSource> sources = Stream.iterate(0, i -> ++i).limit(chunkTotal).map(i ->
+         *                 ComposeSource.builder().bucket(bucket_video)
+         *                         .object(chunkFileFolderPath + i)
+         *                         .build()).collect(Collectors.toList());
+         *
+         */
+        DeleteObject deleteObject = new DeleteObject(chunkFileFolderPath + chunkIndex);
+        RemoveObjectArgs removeObjectArgs = RemoveObjectArgs.builder().bucket(bucket_video).object(String.valueOf(deleteObject)).build();
+        try {
+            minioClient.removeObject(removeObjectArgs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
+    @Transactional
     public RestResponse uploadChunk(String fileMd5, int chunk, String localChunkFilePath) {
         //分块文件的路径
         String chunkFilePath = getChunkFileFolderPath(fileMd5) + chunk;
@@ -277,10 +317,30 @@ public class MediaFileServiceImpl implements MediaFileService {
         if (!b){
             return RestResponse.validfail(false,"上传分块文件失败");
         }
+        //上传成功之后把上传文件记录到数据库，并作标识
+        int i = InsertmediaProcess(chunk, fileMd5, bucket_video, "1", chunkFilePath);
+        if (i<=0){
+            return RestResponse.validfail(false,"记录分块文件到数据库失败");
+        }
         return RestResponse.success(true);
     }
 
+
+    private int InsertmediaProcess(int chunk,String fileMd5,String bucket,String status,String chunkFilePath){
+        MediaProcess mediaProcess = new MediaProcess();
+        mediaProcess.setFileId(fileMd5+chunk);
+        mediaProcess.setFilename(fileMd5);
+        mediaProcess.setBucket(bucket);
+        mediaProcess.setCreateDate(LocalDateTime.now());
+//        mediaProcess.setStatus("1");
+        mediaProcess.setStatus(status);
+        mediaProcess.setUrl(chunkFilePath);
+        int insert = mediaProcessMapper.insert(mediaProcess);
+        return insert;
+    }
+
     @Override
+    @Transactional
     public RestResponse mergechunks(Long companyId, String fileMd5, int chunkTotal, UploadFileParamsDto uploadFileParamsDto) {
         //分块文件所在目录
         String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
@@ -336,7 +396,20 @@ public class MediaFileServiceImpl implements MediaFileService {
         }
         //清理分块文件
         clearChunkFiles(chunkFileFolderPath,chunkTotal);
+        //批量清理数据库存储的分块文件信息
+        int i = clearMediaProcess(fileMd5);
+        if (i<=0){
+            return RestResponse.validfail("数据库分块文件删除失败");
+        }
         return RestResponse.success(true);
+    }
+
+    private int clearMediaProcess(String fileMd5){
+     //delete medisprocess where filename = XXX;
+        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MediaProcess::getFilename,fileMd5).eq(MediaProcess::getStatus,"1");
+        int i = mediaProcessMapper.delete(queryWrapper);
+        return i;
     }
 
     private void clearChunkFiles(String chunkFileFolderPath,int chunkTotal){
