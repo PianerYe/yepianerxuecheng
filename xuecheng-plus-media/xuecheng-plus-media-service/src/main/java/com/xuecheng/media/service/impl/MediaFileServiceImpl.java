@@ -215,10 +215,37 @@ public class MediaFileServiceImpl implements MediaFileService {
              log.debug("向数据库保存文件信息失败,bucket:{},objectName:{}",bucket,objectName);
              return null;
          }
+         //记录待处理的任务
+         //minmeType判断如果是avi视频写入待处理任务
+         addWaitingTask(mediaFiles);
+         //向 MediaProcess插入记录
          return mediaFiles;
      }
      return mediaFiles;
  }
+
+     /**
+      * 添加待处理任务
+      * */
+     private void addWaitingTask(MediaFiles mediaFiles){
+         //获取文件的mimeType
+         String filename = mediaFiles.getFilename();
+         //文件扩展名
+         String extension = filename.substring(filename.lastIndexOf("."));
+         String mimeType = getMimeType(extension);
+         if (mimeType.equals("video/x-msvideo")){//如果是avi写入待处理表
+             MediaProcess mediaProcess = new MediaProcess();
+             BeanUtils.copyProperties(mediaFiles,mediaProcess);
+             //状态是未处理
+             mediaProcess.setStatus("1");//未处理
+             mediaProcess.setCreateDate(LocalDateTime.now());
+             mediaProcess.setFailCount(0);//失败默认0
+             mediaProcess.setUrl(null);
+             mediaProcessMapper.insert(mediaProcess);
+         }
+         //
+     }
+
 
     @Override
     public RestResponse<Boolean> checkFile(String fileMd5) {
@@ -259,14 +286,14 @@ public class MediaFileServiceImpl implements MediaFileService {
         String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
         //得到分块文件路径
         //判断数据库是否存在
-        String fileId = fileMd5 + chunkIndex;
-        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(MediaProcess::getFileId, fileId);
-        MediaProcess mediaProcess = mediaProcessMapper.selectOne(queryWrapper);
-        if (mediaProcess != null && "1".equals(mediaProcess.getStatus())){
-            //数据库存在
-            return RestResponse.success(true);
-        }
+//        String fileId = fileMd5 + chunkIndex;
+//        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(MediaProcess::getFileId, fileId);
+//        MediaProcess mediaProcess = mediaProcessMapper.selectOne(queryWrapper);
+//        if (mediaProcess != null && "1".equals(mediaProcess.getStatus())){
+//            //数据库存在
+//            return RestResponse.success(true);
+//        }
         //如果数据库不存在
         //如果数不存在再查询Minio
         GetObjectArgs getObjectArgs = GetObjectArgs.builder()
@@ -279,7 +306,7 @@ public class MediaFileServiceImpl implements MediaFileService {
                 //文件已存在
                 //清除分块文件，并且重新设置下载
                 //clearChunkFiles
-                clearChunkIndexFile(chunkFileFolderPath,chunkIndex);
+//                clearChunkIndexFile(chunkFileFolderPath,chunkIndex);
                 return RestResponse.success(false);
             }
         } catch (Exception e) {
@@ -318,10 +345,10 @@ public class MediaFileServiceImpl implements MediaFileService {
             return RestResponse.validfail(false,"上传分块文件失败");
         }
         //上传成功之后把上传文件记录到数据库，并作标识
-        int i = InsertmediaProcess(chunk, fileMd5, bucket_video, "1", chunkFilePath);
-        if (i<=0){
-            return RestResponse.validfail(false,"记录分块文件到数据库失败");
-        }
+//        int i = InsertmediaProcess(chunk, fileMd5, bucket_video, "1", chunkFilePath);
+//        if (i<=0){
+//            return RestResponse.validfail(false,"记录分块文件到数据库失败");
+//        }
         return RestResponse.success(true);
     }
 
@@ -395,12 +422,13 @@ public class MediaFileServiceImpl implements MediaFileService {
             return RestResponse.validfail(false,"文件入库失败");
         }
         //清理分块文件
-        clearChunkFiles(chunkFileFolderPath,chunkTotal);
+//        clearChunkFiles(chunkFileFolderPath,chunkTotal);
+        //记录待处理任务
         //批量清理数据库存储的分块文件信息
-        int i = clearMediaProcess(fileMd5);
-        if (i<=0){
-            return RestResponse.validfail("数据库分块文件删除失败");
-        }
+//        int i = clearMediaProcess(fileMd5);
+//        if (i<=0){
+//            return RestResponse.validfail("数据库分块文件删除失败");
+//        }
         return RestResponse.success(true);
     }
 
