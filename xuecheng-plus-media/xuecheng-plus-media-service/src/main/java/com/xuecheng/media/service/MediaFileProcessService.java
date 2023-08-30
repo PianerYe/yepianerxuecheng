@@ -14,5 +14,7 @@ import java.util.List;
 
 public interface MediaFileProcessService {
 
-    List<MediaProcess> selectListByShardIndex(@Param("shardTotal") int shardTotal, @Param("shardIndex") int shardIndex, @Param("count") int count);
+    public List<MediaProcess> selectListByShardIndex(@Param("shardTotal") int shardTotal, @Param("shardIndex") int shardIndex, @Param("count") int count);
+
+    public boolean startTask(@Param("id") long id);
 }
