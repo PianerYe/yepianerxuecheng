@@ -17,4 +17,6 @@ public interface MediaFileProcessService {
     public List<MediaProcess> selectListByShardIndex(@Param("shardTotal") int shardTotal, @Param("shardIndex") int shardIndex, @Param("count") int count);
 
     public boolean startTask(@Param("id") long id);
+
+    public void saveProcessFinsihStatus(Long taskId,String status,String fileID,String url,String errorMsg);
 }
