@@ -114,7 +114,7 @@ public class MediaFileServiceImpl implements MediaFileService {
   * @param bucket 桶
   * @param mimeType 媒体类型
   * */
- private boolean addMediaFilesToMinIO(String localFilePath,String mimeType,
+ public boolean addMediaFilesToMinIO(String localFilePath,String mimeType,
                               String bucket, String objectName){
   //上传文件的参数信息
   try {
@@ -422,7 +422,7 @@ public class MediaFileServiceImpl implements MediaFileService {
             return RestResponse.validfail(false,"文件入库失败");
         }
         //清理分块文件
-//        clearChunkFiles(chunkFileFolderPath,chunkTotal);
+        clearChunkFiles(chunkFileFolderPath,chunkTotal);
         //记录待处理任务
         //批量清理数据库存储的分块文件信息
 //        int i = clearMediaProcess(fileMd5);

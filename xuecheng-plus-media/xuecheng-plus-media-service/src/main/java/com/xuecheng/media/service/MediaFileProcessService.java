@@ -19,4 +19,6 @@ public interface MediaFileProcessService {
     public boolean startTask(@Param("id") long id);
 
     public void saveProcessFinsihStatus(Long taskId,String status,String fileID,String url,String errorMsg);
+
+    public List<MediaProcess> getMediaProcessList(int shardIndex,int shardTotal,int count);
 }

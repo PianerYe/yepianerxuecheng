@@ -1,5 +1,6 @@
 package com.xuecheng.media.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.xuecheng.media.mapper.MediaFilesMapper;
 import com.xuecheng.media.mapper.MediaProcessHistoryMapper;
@@ -9,6 +10,7 @@ import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.model.po.MediaProcessHistory;
 import com.xuecheng.media.service.MediaFileProcessService;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +54,8 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         if (mediaProcess == null){
             return;
         }
+        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MediaProcess::getId,taskId);
         //如果任务执行失败
         if (status.equals("3")){
             //更新MediaProcess表的状态
@@ -61,12 +65,12 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
 //            mediaProcessMapper.updateById(mediaProcess);
             //更高效的更新方式
             //todo:将上面的更新方式更改为更高效的更新方式
-            LambdaUpdateWrapper<MediaProcess> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(MediaProcess::getId,taskId)
-                    .set(MediaProcess::getStatus,"3")
-                    .set(MediaProcess::getFailCount,mediaProcess.getFailCount()+1)
-                    .set(MediaProcess::getErrormsg,errorMsg);
-            mediaProcessMapper.update(null,updateWrapper);
+                    MediaProcess mediaProcess_u = new MediaProcess();
+                    mediaProcess_u.setStatus("3");
+                    mediaProcess_u.setFailCount(mediaProcess.getFailCount()+1);
+                    mediaProcess_u.setErrormsg(errorMsg);
+            mediaProcessMapper.update(mediaProcess_u,queryWrapper);
+            log.debug("更新任务处理状态为失败，任务信息:{}",mediaProcess_u);
             return;
         }
         //如果任务执行成功
@@ -86,5 +90,11 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         mediaProcessHistoryMapper.insert(mediaProcessHistory);
         //从MediaProcess删除当前任务
         mediaProcessMapper.deleteById(taskId);
+    }
+
+    @Override
+    public List<MediaProcess> getMediaProcessList(int shardIndex,int shardTotal,int count){
+        List<MediaProcess> mediaProcesses = mediaProcessMapper.selectListByShardIndex(shardTotal, shardIndex, count);
+        return mediaProcesses;
     }
 }
