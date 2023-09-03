@@ -60,6 +60,7 @@ public class VideoTask {
 
         //查询待处理的任务
         List<MediaProcess> mediaProcessList = mediaFileProcessService.getMediaProcessList(shardIndex, shardTotal, processors);
+
         //任务数量
         int size = mediaProcessList.size();
         log.debug("取到视频任务处理数:"+size);
@@ -123,6 +124,8 @@ public class VideoTask {
                         mediaFileProcessService.saveProcessFinsihStatus(taskId, "3", fileId, null, result);
                         return;
                     }
+                    objectName = objectName.substring(0,objectName.lastIndexOf(".")) + ".mp4";
+
                     //上传到minio
                     boolean b1 = mediaFileService.addMediaFilesToMinIO(mp4_path, "video/mp4", bucket, objectName);
                     if (!b1) {
@@ -140,11 +143,11 @@ public class VideoTask {
                     //计数器减去1
                     countDownLatch.countDown();
                 }
-            });
+             });
         });
 
         //阻塞,最大限度的等待时间,阻塞最多等待一定的时间后，解除阻塞
-        countDownLatch.await(30, TimeUnit.MINUTES);
+        countDownLatch.await( 30, TimeUnit.MINUTES);
 
     }
 

@@ -9,11 +9,13 @@ import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.base.model.RestResponse;
+import com.xuecheng.media.mapper.MediaChuckMapper;
 import com.xuecheng.media.mapper.MediaFilesMapper;
 import com.xuecheng.media.mapper.MediaProcessMapper;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
+import com.xuecheng.media.model.po.MediaChuck;
 import com.xuecheng.media.model.po.MediaFiles;
 import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.service.MediaFileService;
@@ -63,6 +65,9 @@ public class MediaFileServiceImpl implements MediaFileService {
 
   @Resource
   MediaFileService currentProxy;
+
+  @Resource
+  MediaChuckMapper mediaChuckMapper;
 
   //存储普通文件
   @Value("${minio.bucket.files}")
@@ -286,6 +291,14 @@ public class MediaFileServiceImpl implements MediaFileService {
         String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
         //得到分块文件路径
         //判断数据库是否存在
+        String fileId = fileMd5 + chunkIndex;
+        LambdaQueryWrapper<MediaChuck> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MediaChuck::getFileId,fileId);
+        MediaChuck mediaChuck = mediaChuckMapper.selectOne(queryWrapper);
+        if (mediaChuck != null && "1".equals(mediaChuck.getStatus())){
+            //数据库存在
+            return RestResponse.success(true);
+        }
 //        String fileId = fileMd5 + chunkIndex;
 //        LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
 //        queryWrapper.eq(MediaProcess::getFileId, fileId);
@@ -306,7 +319,7 @@ public class MediaFileServiceImpl implements MediaFileService {
                 //文件已存在
                 //清除分块文件，并且重新设置下载
                 //clearChunkFiles
-//                clearChunkIndexFile(chunkFileFolderPath,chunkIndex);
+                clearChunkIndexFile(chunkFileFolderPath,chunkIndex);
                 return RestResponse.success(false);
             }
         } catch (Exception e) {
@@ -345,10 +358,10 @@ public class MediaFileServiceImpl implements MediaFileService {
             return RestResponse.validfail(false,"上传分块文件失败");
         }
         //上传成功之后把上传文件记录到数据库，并作标识
-//        int i = InsertmediaProcess(chunk, fileMd5, bucket_video, "1", chunkFilePath);
-//        if (i<=0){
-//            return RestResponse.validfail(false,"记录分块文件到数据库失败");
-//        }
+        int i = InsertmediaChuck(chunk, fileMd5, bucket_video, "1", chunkFilePath);
+        if (i<=0){
+            return RestResponse.validfail(false,"记录分块文件到数据库失败");
+        }
         return RestResponse.success(true);
     }
 
@@ -363,6 +376,20 @@ public class MediaFileServiceImpl implements MediaFileService {
         mediaProcess.setStatus(status);
         mediaProcess.setUrl(chunkFilePath);
         int insert = mediaProcessMapper.insert(mediaProcess);
+        return insert;
+    }
+
+    private int InsertmediaChuck(int chunk,String fileMd5,String bucket,String status,String chunkFilePath){
+        MediaChuck mediaChuck = new MediaChuck();
+        mediaChuck.setFileId(fileMd5+chunk);
+        mediaChuck.setFilename(fileMd5);
+        mediaChuck.setBucket(bucket);
+        mediaChuck.setFilePath(chunkFilePath);
+        mediaChuck.setCreateDate(LocalDateTime.now());
+        mediaChuck.setStatus(status);
+//        mediaProcess.setStatus("1");
+        mediaChuck.setUrl(chunkFilePath);
+        int insert = mediaChuckMapper.insert(mediaChuck);
         return insert;
     }
 
@@ -425,6 +452,10 @@ public class MediaFileServiceImpl implements MediaFileService {
         clearChunkFiles(chunkFileFolderPath,chunkTotal);
         //记录待处理任务
         //批量清理数据库存储的分块文件信息
+        int i = clearMediaChuck(fileMd5);
+        if (i<=0){
+            return RestResponse.validfail("数据库分块文件删除失败");
+        }
 //        int i = clearMediaProcess(fileMd5);
 //        if (i<=0){
 //            return RestResponse.validfail("数据库分块文件删除失败");
@@ -437,6 +468,13 @@ public class MediaFileServiceImpl implements MediaFileService {
         LambdaQueryWrapper<MediaProcess> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MediaProcess::getFilename,fileMd5).eq(MediaProcess::getStatus,"1");
         int i = mediaProcessMapper.delete(queryWrapper);
+        return i;
+    }
+    private int clearMediaChuck(String fileMd5){
+        //delete mediachuck where filename = XXX;
+        LambdaQueryWrapper<MediaChuck> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MediaChuck::getFilename,fileMd5).eq(MediaChuck::getStatus,"1");
+        int i = mediaChuckMapper.delete(queryWrapper);
         return i;
     }
 
