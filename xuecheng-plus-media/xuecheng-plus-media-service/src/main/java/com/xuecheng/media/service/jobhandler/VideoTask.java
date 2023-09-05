@@ -1,5 +1,6 @@
 package com.xuecheng.media.service.jobhandler;
 
+import com.alibaba.nacos.common.utils.IoUtils;
 import com.xuecheng.base.utils.Mp4VideoUtil;
 import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.service.MediaFileProcessService;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -91,7 +94,21 @@ public class VideoTask {
                     String objectName = mediaProcess.getFilePath();
 
                     //下载Minio视频到本地
+
                     File file = mediaFileService.downloadFileFromMinIO(bucket, objectName);
+                    FileOutputStream outputStream = null;
+                    File tempFile = null;
+                    try {
+                        tempFile = File.createTempFile("minio",".avi");
+                        outputStream = new FileOutputStream(tempFile);
+                        IoUtils.copy(new FileInputStream(file),outputStream);
+                    }catch (IOException e){
+                        log.debug("原文件转换成avi出错,file:{}",file);
+                        //保存任务处理失败的结果
+                        mediaFileProcessService.saveProcessFinsihStatus(taskId, "3", fileId, null, "原文件转换成avi出错");
+                        return;
+                    }
+                    //tempFile = "minioXXXXXXXX.avi"
                     if (file == null) {
                         log.debug("下载视频出错,任务id:{},bucket:{},objectName:{}", taskId, bucket, objectName);
                         //保存任务处理失败的结果
@@ -99,7 +116,8 @@ public class VideoTask {
                         return;
                     }
                     //源avi视频的路径
-                    String video_path = file.getAbsolutePath();
+//                    String video_path = file.getAbsolutePath();
+                    String video_path = tempFile.getAbsolutePath();
                     //转换后mp4文件的名称
                     String mp4_name = fileId + ".mp4";
                     //转换后mp4文件的路径
@@ -114,6 +132,7 @@ public class VideoTask {
                         return;
                     }
                     String mp4_path = mp4File.getAbsolutePath();
+                    mp4_path = mp4_path.substring(0,mp4_path.lastIndexOf(File.separator)) + File.separator;
                     //创建工具类对象
                     Mp4VideoUtil videoUtil = new Mp4VideoUtil(ffmpegpath, video_path, mp4_name, mp4_path);
                     //开始视频转换，成功将返回success,成功返回success,失败返回失败原因
@@ -124,10 +143,15 @@ public class VideoTask {
                         mediaFileProcessService.saveProcessFinsihStatus(taskId, "3", fileId, null, result);
                         return;
                     }
-                    objectName = objectName.substring(0,objectName.lastIndexOf(".")) + ".mp4";
+                    String localChunkFilePath = mp4_path + mp4_name;
+                    mp4_name = mp4_name.substring(0,1)
+                            + "/" + mp4_name.substring(1,2)
+                            + "/" + mp4_name.substring(0,mp4_name.lastIndexOf("."))
+                            + "/" + mp4_name;
 
                     //上传到minio
-                    boolean b1 = mediaFileService.addMediaFilesToMinIO(mp4_path, "video/mp4", bucket, objectName);
+                    boolean b1 = mediaFileService.addMediaFilesToMinIO(localChunkFilePath, "video/mp4", bucket, mp4_name);
+//                    boolean b1 = mediaFileService.addMediaFilesToMinIO(mp4_path, "video/mp4", bucket, objectName);
                     if (!b1) {
                         log.debug("上传mp4到minio失败,taskId:{}", taskId);
                         mediaFileProcessService.saveProcessFinsihStatus(taskId, "3", fileId, null, "上传mp4到minio失败");
@@ -143,7 +167,7 @@ public class VideoTask {
                     //计数器减去1
                     countDownLatch.countDown();
                 }
-             });
+            });
         });
 
         //阻塞,最大限度的等待时间,阻塞最多等待一定的时间后，解除阻塞
