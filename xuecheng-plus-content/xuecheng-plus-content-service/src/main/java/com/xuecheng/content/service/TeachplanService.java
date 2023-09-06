@@ -32,4 +32,6 @@ public interface TeachplanService {
     public void movedownTeachplan(Long id);
 
     public void associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
+
+    public void deleteWithAssociationMedia(String teachPlanId, String mediaId);
 }
