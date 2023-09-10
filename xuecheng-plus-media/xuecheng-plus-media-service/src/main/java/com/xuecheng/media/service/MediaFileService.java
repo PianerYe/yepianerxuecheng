@@ -62,6 +62,7 @@ public interface MediaFileService {
   */
  public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex);
 
+ public MediaFiles getFileById(String mediaId);
  public RestResponse uploadChunk(String fileMd5,int chunk,String localChunkFilePath);
 
  public RestResponse mergechunks(Long companyId,String fileMd5,int chunkTotal,UploadFileParamsDto uploadFileParamsDto);

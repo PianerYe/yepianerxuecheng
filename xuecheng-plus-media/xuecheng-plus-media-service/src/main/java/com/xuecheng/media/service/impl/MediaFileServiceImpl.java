@@ -328,6 +328,12 @@ public class MediaFileServiceImpl implements MediaFileService {
     return RestResponse.success(false);
 }
 
+    @Override
+    public MediaFiles getFileById(String mediaId) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+        return mediaFiles;
+    }
+
     private void clearChunkIndexFile(String chunkFileFolderPath,int chunkIndex){
         /**
          * List<ComposeSource> sources = Stream.iterate(0, i -> ++i).limit(chunkTotal).map(i ->

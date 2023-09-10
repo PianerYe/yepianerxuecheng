@@ -30,6 +30,9 @@ spring:
           - dataId: logging-${spring.profiles.active}.yaml
             group: yepianerxuecheng-common
             refresh: true
+          - dataId: freemarker-config-dev.yaml
+            group: yepianerxuecheng-common
+            refresh: true
 #  servlet:
 #    multipart:
 #      enabled: true
