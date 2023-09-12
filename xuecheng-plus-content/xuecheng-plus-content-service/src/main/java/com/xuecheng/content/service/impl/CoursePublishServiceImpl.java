@@ -37,5 +37,6 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         List<TeachplanDto> teachplanTree = teachplanService.findTeachplanTree(courseId);
         coursePreviewDto.setTeachplans(teachplanTree);
         return coursePreviewDto;
+        //说点目录没反应的自己不会去看看html代码吗，里面写的是href="javascript:;"
     }
 }

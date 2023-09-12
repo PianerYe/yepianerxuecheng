@@ -47,11 +47,11 @@ http {
         ssi_silent_errors on;
         #access_log  logs/host.access.log  main;
         location /video {
-            proxy_pass   http://fileserver;
+            proxy_pass   http://fileserver/video;
         }
 
         location /mediafiles {
-            proxy_pass   http://fileserver;
+            proxy_pass   http://fileserver/mediafiles;
         }
    }
     server {
@@ -99,6 +99,14 @@ http {
         location /course/learning.html {  
                 root	D:/java/yepianerxuecheng/xc-ui-pc-static-portal;
         } 
+		
+		#openapi
+		location /open/content/ {
+				proxy_pass http://gateserver/content/open/;
+		} 
+		location /open/media/ {
+				proxy_pass http://gateserver/media/open/;
+		} 
 
         #error_page  404              /404.html;
 

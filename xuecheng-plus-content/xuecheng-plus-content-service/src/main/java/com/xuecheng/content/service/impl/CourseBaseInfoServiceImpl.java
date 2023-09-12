@@ -170,6 +170,11 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         BeanUtils.copyProperties(courseBase,courseBaseInfoDto);
         if (courseMarket!=null){
             BeanUtils.copyProperties(courseMarket,courseBaseInfoDto);
+        }else {
+            CourseMarket courseMarket1 = new CourseMarket();
+            courseMarket1.setId(courseId);
+            courseMarket1.setCharge("201000");
+            BeanUtils.copyProperties(courseMarket1,courseBaseInfoDto);
         }
         //通过courseCategoryMapper查询分类信息，将分类名称放在courseBaseInfoDto中
         //todo: 课程分类的名称设置到对象中

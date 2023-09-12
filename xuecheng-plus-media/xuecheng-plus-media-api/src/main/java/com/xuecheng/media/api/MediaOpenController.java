@@ -41,7 +41,7 @@ public class MediaOpenController {
         if (StringUtils.isEmpty(url)){
             return RestResponse.validfail("该视频正在处理中");
         }
-        return RestResponse.success(mediaFiles.getUrl());
+        return RestResponse.success("/video/"+mediaFiles.getUrl());
 
     }
 
