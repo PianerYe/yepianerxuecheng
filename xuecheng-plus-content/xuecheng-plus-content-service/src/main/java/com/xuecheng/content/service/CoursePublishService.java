@@ -2,6 +2,7 @@ package com.xuecheng.content.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * @author yepianer
@@ -18,4 +19,6 @@ public interface CoursePublishService {
      * @date 2022/9/16 15:36
      */
     public CoursePreviewDto getCoursePreviewInfo(Long courseId);
+
+    public void commitAudit(Long companyId,Long courseId);
 }
