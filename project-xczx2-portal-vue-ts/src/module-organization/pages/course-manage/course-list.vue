@@ -259,14 +259,15 @@ export default class extends mixins(MixinTools) {
         }).then(() => {
           if (row.id) {
            commitCourse(row.id).then(() => {
-            this.$message.success('提交成功')
-           }
-           
+            this.$message.success('提交成功');
+             this.$nextTick(() => {
+               this.getList();
+             });
+               }
            )
-          this.getList()
+          // this.getList()
           }
         }).catch(() => {
-          
         });
 
   }
@@ -283,11 +284,13 @@ export default class extends mixins(MixinTools) {
         }).then(() => {
           if (row.id) {
             publishCourse(row.id).then(() => {
-            this.$message.success('操作成功，请稍后在课程搜索中搜索课程')
-           }
-           
+            this.$message.success('操作成功，请稍后在课程搜索中搜索课程');
+            this.$nextTick(() => {
+              this.getList();
+            });
+            }
            )
-          this.getList()
+          // this.getList()
           }
         }).catch(() => {
           
@@ -320,10 +323,13 @@ export default class extends mixins(MixinTools) {
            
            )
           this.getList()
+
           }
         }).catch(() => {
           
-        });
+        }).finally(()=>{
+      this.$forceUpdate();
+    });
   }
   private async handleDelete(index: number, row: ICourseBaseDTO) {
     try {

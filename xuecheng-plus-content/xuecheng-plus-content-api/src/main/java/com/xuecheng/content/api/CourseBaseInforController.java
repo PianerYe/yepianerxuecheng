@@ -82,5 +82,6 @@ public class CourseBaseInforController {
         //获取到用户所属机构的id
         Long companyId = 1232141425L;
         courseBaseInfoService.deleteCourse(companyId,id);
+
     }
 }
