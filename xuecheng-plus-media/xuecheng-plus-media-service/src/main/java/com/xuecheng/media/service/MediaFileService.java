@@ -38,7 +38,7 @@ public interface MediaFileService {
   * @param uploadFileParamsDto 文件信息
   * @return UploadFileResultDto
   * */
- public UploadFileResultDto uploadFile(Long companyId,UploadFileParamsDto uploadFileParamsDto,String localFilePath);
+ public UploadFileResultDto uploadFile(Long companyId,UploadFileParamsDto uploadFileParamsDto,String localFilePath,String objectName);
 
  //不推荐自己注入自己，以后循环依赖不好解决。可以引入AspectJ 可以获取当前代理对象，即使没有接口也能动态代理
  public MediaFiles addMediaFilesToDb (Long companyId,String fileMd5,UploadFileParamsDto uploadFileParamsDto,String bucket,String objectName);
