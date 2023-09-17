@@ -33,6 +33,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.swing.text.Utilities;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -179,7 +180,12 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         saveCoursePublishMessage(courseId);
         //将预发布表数据删除
         coursePublishPreMapper.deleteById(courseId);
-        //
+        //课程信息表发布状态改为已发布
+        CourseBase courseBase = new CourseBase();
+        CourseBase courseBaseOld = courseBaseMapper.selectById(courseId);
+        BeanUtils.copyProperties(courseBaseOld,courseBase);
+        courseBase.setStatus("203002");
+        courseBaseMapper.updateById(courseBase);
     }
 
     @Override

@@ -212,6 +212,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //修改时间
         courseBase.setChangeDate(LocalDateTime.now());
         courseBase.setAuditStatus("202002");
+        courseBase.setStatus("203001");
         //更新数据库
         int i = courseBaseMapper.updateById(courseBase);
         if (i <= 0){
