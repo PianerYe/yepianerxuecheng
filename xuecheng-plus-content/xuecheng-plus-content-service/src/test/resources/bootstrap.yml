@@ -6,6 +6,9 @@ spring:
   cloud:
     nacos:
       server-addr: 192.168.255.100:8848
+      discovery: # 服务注册相关配置
+        namespace: devyepianer
+        group: yepianerxuecheng
       config: # 配置文件的相关信息
         namespace: devyepianer
         group: yepianerxuecheng
