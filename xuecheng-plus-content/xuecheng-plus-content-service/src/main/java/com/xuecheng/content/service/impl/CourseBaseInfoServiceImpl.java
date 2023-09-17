@@ -211,7 +211,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         BeanUtils.copyProperties(editCourseDto,courseBase);
         //修改时间
         courseBase.setChangeDate(LocalDateTime.now());
-
+        courseBase.setAuditStatus("202002");
         //更新数据库
         int i = courseBaseMapper.updateById(courseBase);
         if (i <= 0){
