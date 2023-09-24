@@ -224,6 +224,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         saveCourseMarket(courseMarketNew);
         //查询课程信息
         CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(courseId);
+
+        //调用es接口来写索引
         return courseBaseInfo;
     }
 

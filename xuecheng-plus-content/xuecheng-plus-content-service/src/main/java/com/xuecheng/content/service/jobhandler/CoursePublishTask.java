@@ -1,6 +1,11 @@
 package com.xuecheng.content.service.jobhandler;
 
 import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.feignclient.CourseIndex;
+import com.xuecheng.content.feignclient.SearchServiceClinet;
+import com.xuecheng.content.mapper.CoursePublishMapper;
+import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
@@ -8,6 +13,7 @@ import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -26,6 +32,10 @@ public class CoursePublishTask extends MessageProcessAbstract {
 
     @Resource
     CoursePublishService coursePublishService;
+    @Resource
+    SearchServiceClinet searchServiceClinet;
+    @Resource
+    CoursePublishMapper coursePublishMapper;
     //coursePublishJobHandler
     //任务调度入口
     @XxlJob("coursePublishJobHandler")
@@ -76,6 +86,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
         mqMessageService.completedStageOne(taskId);
     }
 
+    //保存课程索引信息，第二个阶段任务
     private void saveCourseIndex(MqMessage mqMessage,Long courseId){
         //任务id
         Long taskId = mqMessage.getId();
@@ -87,11 +98,21 @@ public class CoursePublishTask extends MessageProcessAbstract {
             log.debug("课程索引信息已写入，无需执行...");
             return;
         }
-        //查询课程信息，调用搜索服务添加索引...
+        //查询课程信息，调用搜索服务添加索引接口
+        //从课程发布表查询课程信息
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
 
+        CourseIndex courseIndex = new CourseIndex();
+        BeanUtils.copyProperties(coursePublish,courseIndex);
+        //远程调用
+        Boolean add = searchServiceClinet.add(courseIndex);
+        if (!add){
+            XueChengPlusException.cast("远程调用搜索服务，添加索引失败");
+        }
         //。。任务处理完成写任务状态为完成
         mqMessageService.completedStageTwo(taskId);
     }
+
     private void saveCourseCache(MqMessage mqMessage,Long courseId){
         //任务id
         Long taskId = mqMessage.getId();
