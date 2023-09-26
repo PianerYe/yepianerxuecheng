@@ -40,7 +40,13 @@ Content-Type: application/json
 
 ### 根据课程id查询课程信息
 GET {{content_host}}/content/course/40
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsieHVlY2hlbmctcGx1cyJdLCJ1c2VyX25hbWUiOiJ6aGFuZ3NhbiIsInNjb3BlIjpbImFsbCJdLCJleHAiOjE2OTU3NTY0NDIsImF1dGhvcml0aWVzIjpbInAxIl0sImp0aSI6IjUyMDlmNDU4LWYzNmQtNGE4ZS05ZDkwLWVlMjI4Yzk1Y2MwOSIsImNsaWVudF9pZCI6IlhjV2ViQXBwIn0.tR6DplyJMv1B5pGtCszHU9rjh3-mN_tNrqRlnI3wrGA
+#Content-Type: application/json
+
+### 通过网关访问课程查询
+GET {{gateway_host}}/content/course/40
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsieHVlY2hlbmctcGx1cyJdLCJ1c2VyX25hbWUiOiJ6aGFuZ3NhbiIsInNjb3BlIjpbImFsbCJdLCJleHAiOjE2OTU3NTg5MDMsImF1dGhvcml0aWVzIjpbInAxIl0sImp0aSI6Ijg1ZTM3YTFhLTcxODctNDVhYy04Njg2LTRlODY4Y2JhNjNlOCIsImNsaWVudF9pZCI6IlhjV2ViQXBwIn0.6XfnNX-QxYdIgxKqdwgw3SA10K7Rs_qXOxz_y06NTzo
+
 
 ### 课程查询
 GET {{content_host}}/content/teachplan/117/tree-nodes
