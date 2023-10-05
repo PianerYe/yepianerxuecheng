@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import javax.annotation.Resource;
+
 /**
  * @author Mr.M
  * @version 1.0
@@ -46,6 +48,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        //密码为明文方式
 //        return NoOpPasswordEncoder.getInstance();
         return new BCryptPasswordEncoder();
+    }
+
+    @Autowired
+    DaoAuthenticationProviderCustom daoAuthenticationProviderCustom;
+
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProviderCustom);
     }
 
     //配置安全拦截机制
