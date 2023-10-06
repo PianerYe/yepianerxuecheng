@@ -52,17 +52,21 @@ public class UserServiceImpl implements UserDetailsService {
         String beanName = authType + "_authservice";
         AuthService authService = applicationContext.getBean(beanName, AuthService.class);
         //调用统一execute方法完成认证
-        XcUserExt execute = authService.execute(authParamsDto);
+        XcUserExt xcUserExt = authService.execute(authParamsDto);
+        //封装XcUserExt用户信息为Use'r'Details
+        UserDetails userPrincipal = getUserPrincipal(xcUserExt);
 
-        //账号
-        String username = authParamsDto.getUsername();
-        //根据username账号查询数据库
-        XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
-        //查询到用户不存在，要返回null即可，spring security框架提示抛出异常用户不存在
-        if (xcUser == null){
-            return null;
-        }
-        //如果查到了用户拿到了正确的密码，最终封装成一个UserDetails对象给spring security框架返回，由框架进行密码比对
+        return userPrincipal;
+    }
+
+    /**
+     * @description 查询用户信息
+     * @param xcUser  用户id，主键
+     * @return com.xuecheng.ucenter.model.po.XcUser 用户信息
+     * @author Mr.M
+     * @date 2022/9/29 12:19
+     */
+    public UserDetails getUserPrincipal(XcUserExt xcUser){
         String password = xcUser.getPassword();
         //权限
         String[] authorities = {"test"};
@@ -70,7 +74,6 @@ public class UserServiceImpl implements UserDetailsService {
         //将用户的信息转成json
         String userJson = JSON.toJSONString(xcUser);
         UserDetails userDetails = User.withUsername(userJson).password(password).authorities(authorities).build();
-
         return userDetails;
     }
 }
