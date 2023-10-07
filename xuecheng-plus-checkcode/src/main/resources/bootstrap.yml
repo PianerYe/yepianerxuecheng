@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: checkcode
+  cloud:
+    nacos:
+      server-addr: 192.168.255.100:8848
+      discovery:
+        namespace: devyepianer
+        group: yepianerxuecheng
+      config:
+        namespace: devyepianer
+        group: yepianerxuecheng
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: swagger-${spring.profiles.active}.yaml
+            group: yepianerxuecheng-common
+            refresh: true
+          - data-id: logging-${spring.profiles.active}.yaml
+            group: yepianerxuecheng-common
+            refresh: true
+          - data-id: redis-${spring.profiles.active}.yaml
+            group: yepianerxuecheng-common
+            refresh: true
+
+  profiles:
+    active: dev
