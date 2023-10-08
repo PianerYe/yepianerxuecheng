@@ -1,11 +1,13 @@
 package com.xuecheng.ucenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.ucenter.feignclient.CheckCodeClient;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.AuthParamsDto;
 import com.xuecheng.ucenter.model.dto.XcUserExt;
 import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.AuthService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,12 +27,29 @@ public class PasswordAuthServiceImpl implements AuthService {
     XcUserMapper xcUserMapper;
     @Resource
     PasswordEncoder passwordEncoder;
+    @Resource
+    CheckCodeClient checkCodeClient;
     @Override
     public XcUserExt execute(AuthParamsDto authParamsDto) {
         //账号
         String username = authParamsDto.getUsername();
 
+        //输入的验证码
+        String checkcode = authParamsDto.getCheckcode();
+        //验证码对应的key
+        String checkcodekey = authParamsDto.getCheckcodekey();
+
+        if (StringUtils.isEmpty(checkcode) || StringUtils.isEmpty(checkcodekey)){
+            throw new RuntimeException("请输入验证码");
+        }
+
+        //远程调用验证码服务接口去校验验证码
         //todo:校验验证码
+        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
+        if (verify == null || !verify){
+            throw new RuntimeException("验证码输入错误");
+        }
+
 
         //账号是否存在
         //根据username账号查询数据库
