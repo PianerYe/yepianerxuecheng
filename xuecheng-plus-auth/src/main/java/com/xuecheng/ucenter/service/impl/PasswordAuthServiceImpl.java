@@ -39,16 +39,16 @@ public class PasswordAuthServiceImpl implements AuthService {
         //验证码对应的key
         String checkcodekey = authParamsDto.getCheckcodekey();
 
-        if (StringUtils.isEmpty(checkcode) || StringUtils.isEmpty(checkcodekey)){
-            throw new RuntimeException("请输入验证码");
-        }
+//        if (StringUtils.isEmpty(checkcode) || StringUtils.isEmpty(checkcodekey)){
+//            throw new RuntimeException("请输入验证码");
+//        }
 
         //远程调用验证码服务接口去校验验证码
         //todo:校验验证码
-        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
-        if (verify == null || !verify){
-            throw new RuntimeException("验证码输入错误");
-        }
+//        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
+//        if (verify == null || !verify){
+//            throw new RuntimeException("验证码输入错误");
+//        }
 
 
         //账号是否存在

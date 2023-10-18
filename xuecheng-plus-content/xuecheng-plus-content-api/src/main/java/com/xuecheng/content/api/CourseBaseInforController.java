@@ -5,6 +5,7 @@ import com.xuecheng.base.exception.ValidationGroups;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.base.utils.SecurityUtil;
+import com.xuecheng.content.model.WxparamDto;
 import com.xuecheng.content.model.dto.*;
 import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 @Api(value = "课程信息管理接口",tags = "课程信息管理接口")
 @RestController()
@@ -53,7 +55,8 @@ public class CourseBaseInforController {
 //        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 //        System.out.println(principal);
         SecurityUtil.XcUser user = SecurityUtil.getUser();
-        System.out.println(user.getUsername());
+        //当user为null,如果打印输出，会报错
+//        System.out.println(user.getUsername());
         CourseBaseInfoDto courseBaseInfo = courseBaseInfoService.getCourseBaseInfo(courseId);
         return courseBaseInfo;
     }
@@ -90,5 +93,19 @@ public class CourseBaseInforController {
         Long companyId = 1232141425L;
         courseBaseInfoService.deleteCourse(companyId,id);
 
+    }
+
+    @PostMapping ("/wxLogin")
+    public String wxLoginTwo(@RequestBody WxparamDto wxparamrDto) {
+        //tempUserId : 3471A8391863D80028274FE5B52CCC3E1697035065495
+        //todo:远程调用微信申请令牌，拿到令牌查询用户信息，将用户信息写入本项目数据库
+//        XcUser xcUser = new XcUser();
+//        暂时硬编写，目的是调试环境
+//        xcUser.setUsername("t1");
+//        if (xcUser==null){
+//            return "redirect:http://www.51xuecheng.cn/error.html";
+//        }
+//        String username = xcUser.getUsername();
+        return "redirect:http://www.51xuecheng.cn/sign.html?username=\"+username+" + "&authType=wx";
     }
 }

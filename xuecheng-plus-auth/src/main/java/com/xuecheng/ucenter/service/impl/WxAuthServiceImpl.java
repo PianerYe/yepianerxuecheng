@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 public class WxAuthServiceImpl implements AuthService {
     @Override
     public XcUserExt execute(AuthParamsDto authParamsDto) {
-        return null;
+
+        XcUserExt xcUserExt = new XcUserExt();
+        xcUserExt.setUsername("t1");
+        return xcUserExt;
     }
 }
