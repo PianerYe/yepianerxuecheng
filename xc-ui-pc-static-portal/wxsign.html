@@ -129,18 +129,22 @@
           setTimeout(function() {
             ifram = document.getElementById("login_container");
             // 检查 ifram 是否存在
+            // console.log(ifram)  //只调用了一次
             if (ifram) {
               iframName = ifram.querySelector("iframe").getAttribute("name")
               console.log(iframName)
+              let pollCount = 0;
+              let maxPolls = 10; //设定你希望轮询的最大次数
               //直接执行轮询方法
                 // 定义一个函数来处理轮询
                 function poll(iframName) {
-
+                  pollCount ++;
+                  console.log(pollCount)
                   // 发送请求到后端以获取数据
                   fetch('http://yepianer.natapp1.cc/auth/getCodeItem/' + iframName)
                           .then(response => {
                             const contentType = response.headers.get('Content-Type')
-                            console.log(contentType)
+                            console.log(contentType) //重复调用这里null
                             if (contentType){
                               return response.json();
                             }else {
@@ -151,17 +155,22 @@
                           .then(data => {
                             console.log('Received data:', data);
                             window.location.href = data.redirect
-                            // 调度下一次轮询
-                            setTimeout(function () {
-                              poll(iframName);
-                            }, 5000); // 每 5 秒轮询一次
+                            if (pollCount < maxPolls) {
+                              // 调度下一次轮询
+                              setTimeout(function () {
+                                poll(iframName);
+                              }, 5000); // 每 5 秒轮询一次
+                            }
                           })
                           .catch(error => {
                             console.error('Error:', error);
-                            // 调度下一次轮询
-                            setTimeout(function () {
-                              poll(iframName);
-                            }, 5000); // 出现错误时也要继续轮询
+                            if (pollCount < maxPolls) {
+                              // 调度下一次轮询
+                              setTimeout(function () {
+                                poll(iframName);
+                              }, 5000);
+                            }
+                             // 出现错误时也要继续轮询
                           });
                 }
                 // 初始化轮询
