@@ -5,18 +5,15 @@ import com.xuecheng.base.exception.ValidationGroups;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.base.utils.SecurityUtil;
-import com.xuecheng.content.model.WxparamDto;
 import com.xuecheng.content.model.dto.*;
-import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 @Api(value = "课程信息管理接口",tags = "课程信息管理接口")
 @RestController()
@@ -26,6 +23,7 @@ public class CourseBaseInforController {
     CourseBaseInfoService courseBaseInfoService;
 
     @ApiOperation("课程查询接口")
+    @PreAuthorize("hasAuthority('xc_teachmanager_course_list')")//权限标识符,拥有次权限才可以访问此方法
     @PostMapping("/course/list")
     public PageResult<CourseBaseDto> list(PageParams pageParams, @RequestBody(required = false) QueryCourseParamsDto queryCourseParamsDto){
         //subsectionNum  任务数   <div>{{scope.row.charge | chargeText}}</div> 是否付费
@@ -95,17 +93,4 @@ public class CourseBaseInforController {
 
     }
 
-    @PostMapping ("/wxLogin")
-    public String wxLoginTwo(@RequestBody WxparamDto wxparamrDto) {
-        //tempUserId : 3471A8391863D80028274FE5B52CCC3E1697035065495
-        //todo:远程调用微信申请令牌，拿到令牌查询用户信息，将用户信息写入本项目数据库
-//        XcUser xcUser = new XcUser();
-//        暂时硬编写，目的是调试环境
-//        xcUser.setUsername("t1");
-//        if (xcUser==null){
-//            return "redirect:http://www.51xuecheng.cn/error.html";
-//        }
-//        String username = xcUser.getUsername();
-        return "redirect:http://www.51xuecheng.cn/sign.html?username=\"+username+" + "&authType=wx";
-    }
 }

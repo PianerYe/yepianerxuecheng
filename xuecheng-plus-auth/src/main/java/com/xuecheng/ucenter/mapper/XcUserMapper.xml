@@ -28,5 +28,10 @@
     <sql id="Base_Column_List">
         id, username, password, salt, name,nickname,company_id, wx_unionid,userpic, utype, birthday, sex, email, cellphone, qq, status, create_time, update_time
     </sql>
+    
+    <insert id="insertWxUser" parameterType="com.xuecheng.ucenter.model.po.XcUser">
+        INSERT INTO xc_user id, username, password, salt, name,nickname,company_id, wx_unionid,userpic, utype, birthday, sex, email, cellphone, qq, status, create_time, update_time
+        VALUES (#{name}, #{age, jdbcType=INTEGER})
+    </insert>
 
 </mapper>

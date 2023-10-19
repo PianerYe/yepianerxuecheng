@@ -11,5 +11,5 @@ import com.xuecheng.ucenter.model.po.XcUser;
  * @author itcast
  */
 public interface XcUserMapper extends BaseMapper<XcUser> {
-
+    int insertWxUser(XcUser xcUser);
 }

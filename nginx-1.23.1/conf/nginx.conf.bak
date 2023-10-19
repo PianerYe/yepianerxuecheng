@@ -39,6 +39,10 @@ http {
 	upstream gateserver{
 		server 127.0.0.1:63010 weight=10;
 	}
+	#前端开发服务
+	upstream uidevserver{
+		server 127.0.0.1:8601 weight=10;
+	}
     server {
         listen       80;
         server_name  www.51xuecheng.cn localhost;
@@ -86,8 +90,8 @@ http {
                 root	D:/java/yepianerxuecheng/xc-ui-pc-static-portal;
         }  
 		#course跳转代理
-		location  /course/ {
-			proxy_pass http://fileserver/mediafiles/course/;
+		location /course/ {
+				proxy_pass http://fileserver/mediafiles/course/;
 		}
 		
 		#openapi

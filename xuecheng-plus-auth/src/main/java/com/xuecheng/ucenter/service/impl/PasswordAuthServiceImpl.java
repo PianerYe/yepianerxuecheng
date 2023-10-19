@@ -45,10 +45,10 @@ public class PasswordAuthServiceImpl implements AuthService {
 
         //远程调用验证码服务接口去校验验证码
         //todo:校验验证码
-//        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
-//        if (verify == null || !verify){
-//            throw new RuntimeException("验证码输入错误");
-//        }
+        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
+        if (verify == null || !verify){
+            throw new RuntimeException("验证码输入错误");
+        }
 
 
         //账号是否存在
