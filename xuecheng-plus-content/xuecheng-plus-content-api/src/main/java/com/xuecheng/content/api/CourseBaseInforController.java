@@ -9,6 +9,7 @@ import com.xuecheng.content.model.dto.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +27,16 @@ public class CourseBaseInforController {
     @PreAuthorize("hasAuthority('xc_teachmanager_course_list')")//权限标识符,拥有次权限才可以访问此方法
     @PostMapping("/course/list")
     public PageResult<CourseBaseDto> list(PageParams pageParams, @RequestBody(required = false) QueryCourseParamsDto queryCourseParamsDto){
+        //当前登录的用户
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        //用户所属机构ID
+        Long companyId = null;
+        if (StringUtils.isNotEmpty(user.getCompanyId())){
+         companyId = Long.parseLong(user.getCompanyId());
+        }
         //subsectionNum  任务数   <div>{{scope.row.charge | chargeText}}</div> 是否付费
 
-        PageResult<CourseBaseDto> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDto);
+        PageResult<CourseBaseDto> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(companyId,pageParams, queryCourseParamsDto);
 
         return courseBasePageResult;
 
