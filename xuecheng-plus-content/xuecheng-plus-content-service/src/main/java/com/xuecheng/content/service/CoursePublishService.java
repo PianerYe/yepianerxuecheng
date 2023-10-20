@@ -2,6 +2,7 @@ package com.xuecheng.content.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.po.CoursePublish;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.File;
@@ -42,4 +43,6 @@ public interface CoursePublishService {
      * @date 2022/9/23 16:59
      */
     public void  uploadCourseHtml(Long courseId,File file);
+
+    public CoursePublish getCoursePublish(Long courseId);
 }

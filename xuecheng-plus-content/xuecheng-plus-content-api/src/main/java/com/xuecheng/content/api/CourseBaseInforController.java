@@ -24,7 +24,7 @@ public class CourseBaseInforController {
     CourseBaseInfoService courseBaseInfoService;
 
     @ApiOperation("课程查询接口")
-    @PreAuthorize("hasAuthority('xc_teachmanager_course_list')")//权限标识符,拥有次权限才可以访问此方法
+//    @PreAuthorize("hasAuthority('xc_teachmanager_course_list')")//权限标识符,拥有次权限才可以访问此方法
     @PostMapping("/course/list")
     public PageResult<CourseBaseDto> list(PageParams pageParams, @RequestBody(required = false) QueryCourseParamsDto queryCourseParamsDto){
         //当前登录的用户
