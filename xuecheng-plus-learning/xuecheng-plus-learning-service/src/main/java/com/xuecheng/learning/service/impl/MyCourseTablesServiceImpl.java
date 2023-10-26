@@ -7,6 +7,7 @@ import com.xuecheng.learning.feignclient.ContentServiceClient;
 import com.xuecheng.learning.mapper.XcChooseCourseMapper;
 import com.xuecheng.learning.mapper.XcCourseTablesMapper;
 import com.xuecheng.learning.model.dto.XcChooseCourseDto;
+import com.xuecheng.learning.model.dto.XcCourseTablesDto;
 import com.xuecheng.learning.model.po.XcChooseCourse;
 import com.xuecheng.learning.model.po.XcCourseTables;
 import com.xuecheng.learning.service.MyCourseTablesService;
@@ -58,11 +59,15 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             //如果是收费课程
             XcChooseCourse xcChooseCourse = addChargeCoruse(userId, coursepublish);
         }
-
-
+        //构造返回值
+        XcChooseCourseDto xcCourseTablesDto = new XcChooseCourseDto();
+        BeanUtils.copyProperties(chooseCourse,xcCourseTablesDto);
         //查询学生的学习资格
+        XcCourseTablesDto learningStatus = getLearningStatus(userId, courseId);
+        //设置学习资格状态
+        xcCourseTablesDto.setLearnStatus(learningStatus.getLearnStatus());
 
-        return null;
+        return xcCourseTablesDto;
     }
 
     //添加免费课程,免费课程加入选课记录表、我的课程表
@@ -102,10 +107,72 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         return xcChooseCourse;
     }
 
+    /**
+     * @description 判断学习资格
+     * @param userId
+     * @param courseId
+     * @return XcCourseTablesDto 学习资格状态 [{"code":"702001","desc":"正常学习"},{"code":"702002","desc":"没有选课或选课后没有支付"},{"code":"702003","desc":"已过期需要申请续期或重新支付"}]
+     * @author Mr.M
+     * @date 2022/10/3 7:37
+     */
+    @Override
+    public XcCourseTablesDto getLearningStatus(String userId, Long courseId) {
+        //查询我的课程表，如果没查到则说明没有选课
+        XcCourseTables xcCourseTables = getXcCourseTables(userId, courseId);
+        if (xcCourseTables == null){
+            XcCourseTablesDto xcCourseTablesDto = new XcCourseTablesDto();
+            xcCourseTablesDto.setLearnStatus("702002");
+            return xcCourseTablesDto;
+        }
+        //如果查到了，判断是否过期，如果过期不能继续学习，没有过期可以继续学习
+        XcCourseTablesDto xcCourseTablesDto = new XcCourseTablesDto();
+        BeanUtils.copyProperties(xcCourseTables,xcCourseTablesDto);
+        //是否过期,true过期，false未过期
+        boolean isExpires = xcCourseTables.getValidtimeEnd().isBefore(LocalDateTime.now());
+        if (!isExpires){
+            //正常学习
+            xcCourseTablesDto.setLearnStatus("702001");
+            return xcCourseTablesDto;
+        }else {
+            //已过期
+            xcCourseTablesDto.setLearnStatus("702003");
+            return xcCourseTablesDto;
+        }
+    }
+
     //添加收费课程
     public XcChooseCourse addChargeCoruse(String userId,CoursePublish coursepublish){
+        //如果存在收费的选课且选课状态为只支付，则直接返回
+        LambdaQueryWrapper<XcChooseCourse> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(XcChooseCourse::getUserId,userId)
+                .eq(XcChooseCourse::getCourseId,coursepublish.getId())
+                .eq(XcChooseCourse::getOrderType,"700002") //收费课程
+                .eq(XcChooseCourse::getStatus,"701002"); //待支付
+        List<XcChooseCourse> xcChooseCourses = chooseCourseMapper.selectList(queryWrapper);
+        if (xcChooseCourses != null && xcChooseCourses.size() >0){
+            return xcChooseCourses.get(0);
+        }
+        //添加选课信息
+        XcChooseCourse xcChooseCourse = new XcChooseCourse();
 
-        return null;
+        xcChooseCourse.setCourseId(coursepublish.getId());
+        xcChooseCourse.setCourseName(coursepublish.getName());
+        xcChooseCourse.setCoursePrice(0f);
+        xcChooseCourse.setUserId(userId);
+        xcChooseCourse.setCompanyId(coursepublish.getCompanyId());
+        xcChooseCourse.setOrderType("700002");//收费课程
+        xcChooseCourse.setStatus("701002");//待支付成功
+        xcChooseCourse.setCreateDate(LocalDateTime.now());
+
+        xcChooseCourse.setValidDays(365);//收费课程默认365
+        xcChooseCourse.setValidtimeStart(LocalDateTime.now());
+        xcChooseCourse.setValidtimeEnd(LocalDateTime.now().plusDays(365));
+
+        int insert = chooseCourseMapper.insert(xcChooseCourse);
+        if (insert <= 0){
+            XueChengPlusException.cast("选课记录表添加失败");
+        }
+        return xcChooseCourse;
     }
     //添加到我的课程表
     public XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse){

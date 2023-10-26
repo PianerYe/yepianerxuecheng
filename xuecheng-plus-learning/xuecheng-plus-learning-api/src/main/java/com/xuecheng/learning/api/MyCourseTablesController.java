@@ -6,6 +6,7 @@ import com.xuecheng.learning.model.dto.MyCourseTableParams;
 import com.xuecheng.learning.model.dto.XcChooseCourseDto;
 import com.xuecheng.learning.model.dto.XcCourseTablesDto;
 import com.xuecheng.learning.model.po.XcCourseTables;
+import com.xuecheng.learning.service.MyCourseTablesService;
 import com.xuecheng.learning.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * @author Mr.M
@@ -28,16 +31,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MyCourseTablesController {
 
+    @Resource
+    MyCourseTablesService myCourseTablesService;
 
     @ApiOperation("添加选课")
     @PostMapping("/choosecourse/{courseId}")
     public XcChooseCourseDto addChooseCourse(@PathVariable("courseId") Long courseId) {
         //当前登录的用户
         SecurityUtil.XcUser user = SecurityUtil.getUser();
+        if (user == null){
+            XueChengPlusException.cast("请登录");
+        }
         //用户id
         String id = user.getId();
         //添加选课
-        return null;
+        XcChooseCourseDto xcChooseCourseDto = myCourseTablesService.addChooseCourse(id, courseId);
+        return xcChooseCourseDto;
     }
 
     @ApiOperation("查询学习资格")
