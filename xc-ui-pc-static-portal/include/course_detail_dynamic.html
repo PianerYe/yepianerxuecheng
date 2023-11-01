@@ -218,7 +218,7 @@
         methods: {
             //马上学习
             startLearning(){
-                
+                console.log(window.location)
                  if(String(window.location).indexOf("/coursepreview/")>0){
                     window.location.href="http://www.51xuecheng.cn/course/preview/learning.html?id="+this.courseId
                     return ;
@@ -266,7 +266,7 @@
               
            },
            startLearngin(){
-            window.location.href="http://www.51xuecheng.cn/course/learning.html?id="+this.courseId
+            window.location.href="http://www.51xuecheng.cn/course/preview/learning.html?id="+this.courseId
            },
             //学习报名
             addCourseTable(){

@@ -7,9 +7,9 @@ import com.xuecheng.learning.model.po.XcChooseCourse;
 
 /**
  * @author yepianer
- * @date 2023/10/20 14:38
+ * @date 2023/11/1 9:34
  * @project_name yepianerxuecheng
- * @description 选课相关的接口
+ * @description
  */
 public interface MyCourseTablesService {
 
@@ -34,5 +34,4 @@ public interface MyCourseTablesService {
      * @date 2022/10/3 7:37
      */
     public XcCourseTablesDto getLearningStatus(String userId, Long courseId);
-
 }

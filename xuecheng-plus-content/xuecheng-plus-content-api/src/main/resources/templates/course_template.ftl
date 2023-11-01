@@ -575,7 +575,7 @@
         <div class="mask"></div>
         <!--欢迎访问课程弹窗- start -->
         <div class="popup-course-box">
-            <div class="title">J${model.courseBase.name} <span class="close-popup-course-box">×</span></div>
+            <div class="title"> ${model.courseBase.name} <span class="close-popup-course-box">×</span></div>
             <div class="content">
                 <p>欢迎学习本课程，本课程免费您可以立即学习，也可加入我的课程表享受更优质的服务。</p>
                 <p><a href="#" @click.prevent="addCourseTable()">加入我的课程表</a>  <a href="#" @click.prevent="startLearngin()">立即学习</a></p>

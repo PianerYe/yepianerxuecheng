@@ -38,6 +38,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     XcChooseCourseMapper chooseCourseMapper;
     @Resource
     MyCourseTablesService currentPoxy;
+    @Transactional
     @Override
     public XcChooseCourseDto addChooseCourse(String userId, Long courseId) {
         //查询课程信息
@@ -51,13 +52,13 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         XcChooseCourse chooseCourse = null;
         if ("201000".equals(charge)){
             //添加免费课程
-            XcChooseCourse xcChooseCourse = currentPoxy.addFreeCoruse(userId, coursepublish);//向选课记录表写
+            chooseCourse = currentPoxy.addFreeCoruse(userId, coursepublish);//向选课记录表写
             //添加到我的课程表
-            XcCourseTables xcCourseTables = addCourseTabls(xcChooseCourse);
+            XcCourseTables xcCourseTables = addCourseTabls(chooseCourse);
 
         }else {
             //如果是收费课程
-            XcChooseCourse xcChooseCourse = addChargeCoruse(userId, coursepublish);
+            chooseCourse = addChargeCoruse(userId, coursepublish);
         }
         //构造返回值
         XcChooseCourseDto xcCourseTablesDto = new XcChooseCourseDto();
@@ -157,7 +158,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
 
         xcChooseCourse.setCourseId(coursepublish.getId());
         xcChooseCourse.setCourseName(coursepublish.getName());
-        xcChooseCourse.setCoursePrice(0f);
+        xcChooseCourse.setCoursePrice(coursepublish.getPrice());
         xcChooseCourse.setUserId(userId);
         xcChooseCourse.setCompanyId(coursepublish.getCompanyId());
         xcChooseCourse.setOrderType("700002");//收费课程
@@ -178,7 +179,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     public XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse){
         //选课记录完成且未过期可以添加课程到课程表
         String status = xcChooseCourse.getStatus();
-        if ("701001".equals(status)){
+        if (!"701001".equals(status)){
             XueChengPlusException.cast("选课未成功，无法添加到课程表");
         }
         XcCourseTables xcCourseTables =

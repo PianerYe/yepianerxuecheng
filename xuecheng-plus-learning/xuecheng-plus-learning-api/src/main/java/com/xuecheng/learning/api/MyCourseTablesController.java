@@ -11,7 +11,6 @@ import com.xuecheng.learning.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,8 +51,13 @@ public class MyCourseTablesController {
     @ApiOperation("查询学习资格")
     @PostMapping("/choosecourse/learnstatus/{courseId}")
     public XcCourseTablesDto getLearnstatus(@PathVariable("courseId") Long courseId) {
-
-        return null;
+        //当前登录的用户
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        if (user == null){
+            XueChengPlusException.cast("请登录");
+        }
+        XcCourseTablesDto learningStatus = myCourseTablesService.getLearningStatus(user.getId(), courseId);
+        return learningStatus;
 
     }
 

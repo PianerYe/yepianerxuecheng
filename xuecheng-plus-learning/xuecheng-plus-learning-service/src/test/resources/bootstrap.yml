@@ -23,10 +23,10 @@ spring:
             group: yepianerxuecheng-common
             refresh: true
           - data-id: logging-${spring.profiles.active}.yaml
-            group: yepianerxuecheng-common
+            group: xuecheng-plus-common
             refresh: true
           - data-id: feign-${spring.profiles.active}.yaml
-            group: xuecheng-plus-common
+            group: yepianerxuecheng-common
             refresh: true
 
   profiles:
