@@ -67,6 +67,7 @@ service.interceptors.response.use(
       duration: 5 * 1000
     })
     if(error.response.status=="401" && error.response.data.errMessage=='没有认证'){
+      // @ts-ignore
       window.location='http://www.51xuecheng.cn/sign.html'
     }
     return Promise.reject(error)

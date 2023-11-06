@@ -68,6 +68,12 @@ public class OrderServiceImpl implements OrderService {
         return payRecordDto;
     }
 
+    @Override
+    public XcPayRecord getPayRecordByPayno(String payNo) {
+        XcPayRecord xcPayRecord = payRecordMapper.selectOne(new LambdaQueryWrapper<XcPayRecord>().eq(XcPayRecord::getPayNo, payNo));
+        return xcPayRecord;
+    }
+
     @Transactional
     public XcOrders saveXcOrders(String userId, AddOrderDto addOrderDto){
         //幂等性判断，同一个选课记录，只能有一个订单
