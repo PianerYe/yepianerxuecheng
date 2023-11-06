@@ -317,6 +317,38 @@
                             this.$message.success('该课程已过期请进入选课列表申请续期或重新支付');
                         }
                     }
+                    }).catch(error=>{
+                        if(error&&error.response.data.errMessage){
+                            this.$message.error(error.response.data.errMessage)
+                        }else{
+                            this.$message.error('出错了')
+                        }
+
+                    })
+                }else{
+                    //弹出登录框架
+                    showlogin()
+                }
+
+            },
+            querypayresult(){
+                let activeUser= getActiveUser();
+                if(activeUser){
+                    querypayresult(this.payNo).then((res) => {
+                        if(res.status){
+                            if(res.status == '601002'){//支付成功
+                                this.$message.success('支付成功，可以去学习啦');
+                            }else{
+                                this.$message.error('请扫码支付，支付完成请不要重复支付。');
+                            }
+                        }
+                    }).catch(error=>{
+                        if(error&&error.response.data.errMessage){
+                            this.$message.error(error.response.data.errMessage)
+                        }else{
+                            this.$message.error('出错了')
+                        }
+
                     })
                 }else{
                     //弹出登录框架
@@ -352,6 +384,13 @@
                         if(res&&res.qrcode){
                             this.qrcode=res.qrcode
                         }
+                    }).catch(error=>{
+                        if(error&&error.response.data.errMessage){
+                            this.$message.error(error.response.data.errMessage)
+                        }else{
+                            this.$message.error('出错了')
+                        }
+
                     })
 
             },

@@ -89,7 +89,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
 
         xcChooseCourse.setCourseId(coursepublish.getId());
         xcChooseCourse.setCourseName(coursepublish.getName());
-        xcChooseCourse.setCoursePrice(0f);
+        xcChooseCourse.setCoursePrice(coursepublish.getPrice());
         xcChooseCourse.setUserId(userId);
         xcChooseCourse.setCompanyId(coursepublish.getCompanyId());
         xcChooseCourse.setOrderType("700001");//免费课程

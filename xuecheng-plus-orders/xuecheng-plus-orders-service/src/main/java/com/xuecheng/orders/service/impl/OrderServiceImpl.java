@@ -98,18 +98,20 @@ public class OrderServiceImpl implements OrderService {
         //订单明细表
         //将前端传入的明细的json转成List
         String orderDetailJson = addOrderDto.getOrderDetail();
-        List<XcOrdersGoods> xcOrdersGoods = JSON.parseArray(orderDetailJson, XcOrdersGoods.class);
+        List<XcOrdersGoods> xcOrdersGoodsList = JSON.parseArray(orderDetailJson, XcOrdersGoods.class);
         //遍历，插入订单明细
-        xcOrdersGoods.forEach(goods->{
-            goods.setGoodsId(String.valueOf(orderId));
+        xcOrdersGoodsList.forEach(goods->{
+            XcOrdersGoods xcOrdersGoods = new XcOrdersGoods();
+            BeanUtils.copyProperties(goods,xcOrdersGoods);
+            xcOrdersGoods.setOrderId(orderId);
             //插入订单明细
-            int insert1 = ordersGoodsMapper.insert(goods);
+            int insert1 = ordersGoodsMapper.insert(xcOrdersGoods);
             if (insert1<=0){
                 XueChengPlusException.cast("插入订单明细失败");
             }
 
         });
-        return null;
+        return xcOrders;
     }
 
     /**
