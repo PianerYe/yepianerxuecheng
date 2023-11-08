@@ -34,12 +34,12 @@ public class AliPayTest {
                 AlipayConfig.FORMAT,AlipayConfig.CHARSET,ALIPAY_PUBLIC_KEY,AlipayConfig.SIGNTYPE);
         AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
         JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", "20150320010101002");
+        bizContent.put("out_trade_no", "1721906086235459584");
         request.setBizContent(bizContent.toString());
         AlipayTradeQueryResponse response = alipayClient.execute(request);
         if(response.isSuccess()){
             System.out.println("调用成功");
-            System.out.println(response.getBody());
+            System.out.println(response.getBody().toString());
         } else {
             System.out.println("调用失败");
         }

@@ -1,15 +1,23 @@
 package com.xuecheng.orders.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.utils.IdWorkerUtils;
 import com.xuecheng.base.utils.QRCodeUtil;
+import com.xuecheng.orders.config.AlipayConfig;
 import com.xuecheng.orders.mapper.XcOrdersGoodsMapper;
 import com.xuecheng.orders.mapper.XcOrdersMapper;
 import com.xuecheng.orders.mapper.XcPayRecordMapper;
 import com.xuecheng.orders.model.dto.AddOrderDto;
 import com.xuecheng.orders.model.dto.PayRecordDto;
+import com.xuecheng.orders.model.dto.PayStatusDto;
 import com.xuecheng.orders.model.po.XcOrders;
 import com.xuecheng.orders.model.po.XcOrdersGoods;
 import com.xuecheng.orders.model.po.XcPayRecord;
@@ -22,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yepianer
@@ -40,6 +49,12 @@ public class OrderServiceImpl implements OrderService {
     XcPayRecordMapper payRecordMapper;
     @Value("${pay.qrcodeurl}")
     String qrcodeurl;
+    @Value("${pay.alipay.APP_ID}")
+    String APP_ID;
+    @Value("${pay.alipay.APP_PRIVATE_KEY}")
+    String APP_PRIVATE_KEY;
+    @Value("${pay.alipay.ALIPAY_PUBLIC_KEY}")
+    String ALIPAY_PUBLIC_KEY;
     @Transactional
     @Override
     public PayRecordDto createOrder(String userId, AddOrderDto addOrderDto) {
@@ -72,6 +87,69 @@ public class OrderServiceImpl implements OrderService {
     public XcPayRecord getPayRecordByPayno(String payNo) {
         XcPayRecord xcPayRecord = payRecordMapper.selectOne(new LambdaQueryWrapper<XcPayRecord>().eq(XcPayRecord::getPayNo, payNo));
         return xcPayRecord;
+    }
+
+    @Override
+    public PayRecordDto queryPayResult(String payNo) {
+        //调用支付宝的接口查询支付结果
+        PayStatusDto payStatusDto = queryPayResultFromAlipay(payNo);
+        System.out.println(payStatusDto);
+        //拿到支付结果更新支付记录表和订单表的支付状态
+        saveAliPayStatus(payStatusDto);
+
+        return null;
+    }
+
+    /**
+     * 请求支付宝查询支付结果
+     * @param payNo 支付交易号
+     * @return 支付结果
+     */
+    public PayStatusDto queryPayResultFromAlipay(String payNo){
+        AlipayClient alipayClient = new DefaultAlipayClient(AlipayConfig.URL,APP_ID,APP_PRIVATE_KEY,
+                AlipayConfig.FORMAT,AlipayConfig.CHARSET,ALIPAY_PUBLIC_KEY,AlipayConfig.SIGNTYPE);
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", payNo);
+        request.setBizContent(bizContent.toString());
+        //支付宝返回的信息
+        String body = null;
+        try {
+            AlipayTradeQueryResponse response = alipayClient.execute(request);
+            if (!response.isSuccess()){
+                //交易不成功
+                XueChengPlusException.cast("请求支付查询支付结果失败");
+            }
+            body = response.getBody();
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            XueChengPlusException.cast("请求支付查询支付结果异常");
+        }
+        Map resultMap = JSON.parseObject(body, Map.class);
+        Map bodyMap = (Map) resultMap.get("alipay_trade_query_response");
+
+        //解析支付结果
+        PayStatusDto payStatusDto = new PayStatusDto();
+        payStatusDto.setOut_trade_no(payNo);
+        payStatusDto.setTrade_no((String)bodyMap.get("trade_no"));//支付宝的交易号
+        payStatusDto.setTrade_status((String) bodyMap.get("trade_status"));
+        payStatusDto.setApp_id(APP_ID);
+        payStatusDto.setTotal_amount((String) bodyMap.get("total_amount"));//总金额
+
+        return payStatusDto;
+    }
+
+
+
+    /**
+     * @description 保存支付宝支付结果
+     * @param payStatusDto  支付结果信息
+     * @return void
+     * @author Mr.M
+     * @date 2022/10/4 16:52
+     */
+    public void saveAliPayStatus(PayStatusDto payStatusDto){
+
     }
 
     @Transactional

@@ -212,7 +212,8 @@
             companyId:'template',
             company_stat:[],
             course_stat:{"s601001":"","s601002":"","s601003":""},
-            qrcode:''
+            qrcode:'',
+            payNo:''
 
         },
         methods: {
@@ -382,6 +383,7 @@
                     console.log(addOrderDto)
                     generatepaycode(addOrderDto).then((res) => {
                         if(res&&res.qrcode){
+                            this.payNo = res.payNo
                             this.qrcode=res.qrcode
                         }
                     }).catch(error=>{

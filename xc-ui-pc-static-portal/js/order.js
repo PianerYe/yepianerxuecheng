@@ -32,3 +32,7 @@ const addChoosecourse = courseId => {
 const generatepaycode = (params) => {
     return requestPost('/api/orders/generatepaycode',params);
 }
+/*查询课程的统计信息*/
+const querypayresult = (payNo) => {
+    return requestGet('/api/orders/payresult?payNo='+payNo);
+}
