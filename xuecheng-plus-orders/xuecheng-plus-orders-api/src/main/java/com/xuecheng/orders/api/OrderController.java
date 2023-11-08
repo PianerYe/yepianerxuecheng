@@ -104,7 +104,7 @@ public class OrderController {
         //查询支付结果
         PayRecordDto payRecordDto = orderService.queryPayResult(payNo);
 
-        return null;
+        return payRecordDto;
 
     }
 }

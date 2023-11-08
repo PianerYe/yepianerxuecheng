@@ -47,6 +47,8 @@ public class OrderServiceImpl implements OrderService {
     XcOrdersGoodsMapper ordersGoodsMapper;
     @Resource
     XcPayRecordMapper payRecordMapper;
+    @Resource
+    OrderServiceImpl currentProxy;
     @Value("${pay.qrcodeurl}")
     String qrcodeurl;
     @Value("${pay.alipay.APP_ID}")
@@ -95,9 +97,12 @@ public class OrderServiceImpl implements OrderService {
         PayStatusDto payStatusDto = queryPayResultFromAlipay(payNo);
         System.out.println(payStatusDto);
         //拿到支付结果更新支付记录表和订单表的支付状态
-        saveAliPayStatus(payStatusDto);
-
-        return null;
+        currentProxy.saveAliPayStatus(payStatusDto);
+        //返回最新的支付记录的信息
+        XcPayRecord payRecordByPayno = getPayRecordByPayno(payNo);
+        PayRecordDto payRecordDto = new PayRecordDto();
+        BeanUtils.copyProperties(payRecordByPayno,payRecordDto);
+        return payRecordDto;
     }
 
     /**
@@ -143,12 +148,47 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * @description 保存支付宝支付结果
-     * @param payStatusDto  支付结果信息
+     * @param payStatusDto  支付结果信息,从支付宝查询到的信息
      * @return void
      * @author Mr.M
      * @date 2022/10/4 16:52
      */
+    @Transactional
     public void saveAliPayStatus(PayStatusDto payStatusDto){
+        String payNo = payStatusDto.getOut_trade_no();//支付流水号
+        //如果支付成功
+        XcPayRecord payRecordByPayno = getPayRecordByPayno(payNo);
+        if (payRecordByPayno == null){
+            XueChengPlusException.cast("找不到相关的支付记录");
+        }
+        //拿到相关联的订单ID
+        Long orderId = payRecordByPayno.getOrderId();
+        XcOrders xcOrders = ordersMapper.selectById(orderId);
+        if (xcOrders == null){
+            XueChengPlusException.cast("找不到相关联的订单");
+        }
+        //支付状态
+        String statusFromDb = payRecordByPayno.getStatus();
+        //如果数据库表的状态已经是成功了，不再处理了
+        if ("601002".equals(statusFromDb)){
+            return;
+        }
+        //如果支付成功
+        String trade_status = payStatusDto.getTrade_status();//从支付宝查询到的支付结果
+        if (trade_status.equals("TRADE_SUCCESS")){//支付宝返回的信息是支付成功
+            //更新支付记录表的状态为成功
+            payRecordByPayno.setStatus("601002");
+            //支付宝订单号
+            payRecordByPayno.setOutPayNo(payStatusDto.getTrade_no());
+            //第三方支付渠道编号
+            payRecordByPayno.setOutPayChannel("Alipay");
+            //支付成功的实践
+            payRecordByPayno.setPaySuccessTime(LocalDateTime.now());
+            payRecordMapper.updateById(payRecordByPayno);
+            //更新订单表的状态为成功
+            xcOrders.setStatus("600002");//订单状态为交易成功
+            ordersMapper.updateById(xcOrders);
+        }
 
     }
 
