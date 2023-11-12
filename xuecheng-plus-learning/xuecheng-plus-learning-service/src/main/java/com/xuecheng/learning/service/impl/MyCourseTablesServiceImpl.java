@@ -164,7 +164,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             }
             //向我的课程表插入记录
             XcCourseTables xcCourseTables = addCourseTabls(chooseCourse);
-
+            return true;
         }
         return false;
     }

@@ -4,6 +4,7 @@ import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.orders.model.dto.AddOrderDto;
 import com.xuecheng.orders.model.dto.PayRecordDto;
 import com.xuecheng.orders.model.dto.PayStatusDto;
+import com.xuecheng.orders.model.po.XcOrders;
 import com.xuecheng.orders.model.po.XcPayRecord;
 
 /**
@@ -48,4 +49,8 @@ public interface OrderService {
      * @param message
      */
     public void notifyPayResult(MqMessage message);
+    /**
+     * 根据订单号查询订单
+     * */
+    public XcOrders queryWithId(Long orderId);
 }

@@ -247,6 +247,15 @@ public class OrderServiceImpl implements OrderService {
                 "",build,correlationData);
     }
 
+    @Override
+    public XcOrders queryWithId(Long orderId) {
+        XcOrders xcOrders = ordersMapper.selectById(orderId);
+        if (xcOrders == null){
+            XueChengPlusException.cast("订单号不存在，请核对");
+        }
+        return xcOrders;
+    }
+
     @Transactional
     public XcOrders saveXcOrders(String userId, AddOrderDto addOrderDto){
         //幂等性判断，同一个选课记录，只能有一个订单

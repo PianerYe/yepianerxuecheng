@@ -10,6 +10,7 @@ import com.xuecheng.orders.config.AlipayConfig;
 import com.xuecheng.orders.model.dto.AddOrderDto;
 import com.xuecheng.orders.model.dto.PayRecordDto;
 import com.xuecheng.orders.model.dto.PayStatusDto;
+import com.xuecheng.orders.model.po.XcOrders;
 import com.xuecheng.orders.model.po.XcPayRecord;
 import com.xuecheng.orders.service.OrderService;
 import com.xuecheng.orders.util.SecurityUtil;
@@ -76,8 +77,17 @@ public class OrderController {
         //支付结果
         String status = payRecordByPayno.getStatus();
         if ("601002".equals(status)){
+
             XueChengPlusException.cast("已支付，无需重复支付");
         }
+        //还需要做一个判断，如果查询到order-_id存在且已经支付，那么也不需要再次支付
+        //传入商品订单号id，根据商品订单号id查询订单状态即可
+        Long orderId = payRecordByPayno.getOrderId();
+        XcOrders xcOrders = orderService.queryWithId(orderId);
+        if ("600002".equals(xcOrders.getStatus())){
+            XueChengPlusException.cast("已支付，无需重复支付");
+        }
+
         //请求支付宝下单
         AlipayClient alipayClient = new DefaultAlipayClient(AlipayConfig.URL, APP_ID, APP_PRIVATE_KEY,
                 AlipayConfig.FORMAT, AlipayConfig.CHARSET, ALIPAY_PUBLIC_KEY, AlipayConfig.SIGNTYPE); //获得初始化的AlipayClient
