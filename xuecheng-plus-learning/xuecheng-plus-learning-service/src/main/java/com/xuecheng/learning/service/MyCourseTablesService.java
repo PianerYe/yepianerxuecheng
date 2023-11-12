@@ -34,4 +34,11 @@ public interface MyCourseTablesService {
      * @date 2022/10/3 7:37
      */
     public XcCourseTablesDto getLearningStatus(String userId, Long courseId);
+
+    /**
+     * @description 保存选课成功状态
+     * @param chooseCourseId
+     * @date 2022/10/3 7:37
+     */
+    public boolean saveChooseCourseStauts(String chooseCourseId);
 }
