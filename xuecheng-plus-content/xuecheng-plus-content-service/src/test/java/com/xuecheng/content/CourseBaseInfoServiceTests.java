@@ -4,7 +4,6 @@ import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.content.model.dto.CourseBaseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDto;
-import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +27,12 @@ public class CourseBaseInfoServiceTests {
         pageParams.setPageNo(1L);
         pageParams.setPageSize(3L);
 
-        PageResult<CourseBaseDto> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, courseParamsDto);
+        Long companyId = 1232141425L;
+//        PageResult<CourseBaseDto> courseBasePageResult =
+//                courseBaseInfoService.queryCourseBaseList(pageParams, courseParamsDto);
+
+        PageResult<CourseBaseDto> courseBasePageResult =
+                courseBaseInfoService.queryCourseBaseList(companyId,pageParams, courseParamsDto);
         System.out.println(courseBasePageResult);
     }
 }
